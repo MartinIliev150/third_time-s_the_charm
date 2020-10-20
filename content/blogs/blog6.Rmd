@@ -1,0 +1,255 @@
+---
+categories:
+- ""
+- ""
+date: "2017-10-31T21:28:43-05:00"
+description: ""
+draft: false
+image: mvs123.jpg
+keywords: ""
+slug: blog6
+title: ARatings and movie budgets
+---
+
+
+```{r, setup}
+knitr::opts_chunk$set(
+  message = FALSE, 
+  warning = FALSE, 
+  tidy=FALSE,     # display code as typed
+  size="small")   # slightly smaller font for code
+options(digits = 3)
+
+# default figure size
+knitr::opts_chunk$set(
+  fig.width=6.75, 
+  fig.height=6.75,
+  fig.align = "center"
+)
+```
+
+
+```{r load-libraries, warning=FALSE, message=FALSE, echo=FALSE}
+library(tidyverse)  # Load ggplot2, dplyr, and all the other tidyverse packages
+library(mosaic)
+library(ggthemes)
+library(lubridate)
+library(fivethirtyeight)
+library(here)
+library(skimr)
+library(janitor)
+library(vroom)
+library(tidyquant)
+library(ggrepel)
+```
+
+
+# Analysis of movies- IMDB dataset
+
+```{r,load_movies, warning=FALSE, message=FALSE }
+
+movies <- read_csv(here::here("data", "movies.csv"))
+glimpse(movies)
+
+```
+
+Besides the obvious variables of `title`, `genre`, `director`, `year`, and `duration`, the rest of the variables are as follows:
+
+- `gross` : The gross earnings in the US box office, not adjusted for inflation
+- `budget`: The movie's budget 
+- `cast_facebook_likes`: the number of facebook likes cast memebrs received
+- `votes`: the number of people who voted for (or rated) the movie in IMDB 
+- `reviews`: the number of reviews for that movie
+- `rating`: IMDB average rating 
+
+```{r}
+glimpse(movies)
+skim(movies)
+movies %>%
+group_by(genre) %>%
+count(sort = TRUE)
+
+gross_budget_by_genre <- movies %>% 
+  select(genre, gross, budget)
+Budget_by_genre <- aggregate(gross_budget_by_genre[ ,2:3],list(gross_budget_by_genre$genre), mean)
+
+return_on_budget <- Budget_by_genre
+return_on_budget$return <- return_on_budget$gross/return_on_budget$bud
+
+get
+print(return_on_budget)
+
+
+```
+
+```{r}
+Director <- movies %>%
+  select(director,gross)
+Director_combined <- aggregate(Director$gross,list(Director$director), sum)
+Director_Mean <- aggregate(Director$gross,list(Director$director), mean)
+Director_combined$Mean <- Director_Mean[, 2]
+Director_Stdev <- aggregate(Director$gross,list(Director$director), sd)
+Director_combined$SD <- Director_Stdev[, 2]
+Director_Median <- aggregate(Director$gross,list(Director$director), median)
+Director_combined$Median <- Director_Median[, 2]
+
+Director_combined <- Director_combined[with(Director_combined,order(-Director_combined$x)), ]
+print(Director_combined)
+head(Director_combined,15)
+
+```
+
+```{r}
+Genre_ratings <- movies %>%
+  select(genre,rating)
+Genre_avgrating <- aggregate(Genre_ratings$rating, list(Genre_ratings$genre), mean)
+Genre_Stdevrating <- aggregate(Genre_ratings$rating, list(Genre_ratings$genre), sd)
+Genre_avgrating$Standarddev <- Genre_Stdevrating[, 2]
+Genre_Minrating <- aggregate(Genre_ratings$rating, list(Genre_ratings$genre), min)
+Genre_avgrating$Min <- Genre_Minrating[, 2]
+Genre_Maxrating <- aggregate(Genre_ratings$rating, list(Genre_ratings$genre), max)
+Genre_avgrating$Max <- Genre_Maxrating[, 2]
+Genre_Medianrating <- aggregate(Genre_ratings$rating, list(Genre_ratings$genre), median)
+Genre_avgrating$Median <- Genre_Medianrating[, 2]
+print(Genre_ratings)
+
+
+```
+
+  
+## Facebook Likes vs. Gross Return
+ 
+  It seems facebook likes related to the cast are not the primary determinant of how well a movie is going to gross at the box office.
+
+
+```{r, gross_on_fblikes}
+
+ggplot(movies, aes(x=cast_facebook_likes, y=gross)) + geom_point() + facet_wrap(~genre) + labs( x = " Cast Facebook Likes", y = " Gross Return")
+
+```
+
+
+## Budget vs Gross Return 
+  
+  At first glance when we compare budget to gross at the box office we see that there is a positive relationship, where movies with higher budgets tend to do better than those with low ones. However when we facet according to genre we observe that this relationship is far more pronounced in the action and adventure genres than in others. This is best explained by the fact that making an entertaining action movie costs more than making a good biography - a.k.a Michael Bay derives more marginal revenue for every marginal dollar spent on more explosives, than someone making a biography might. 
+
+```{r, gross_on_budget}
+
+ggplot(movies, aes(x=budget, y=gross, color = genre)) + geom_point() 
+ggplot(movies, aes(x=budget, y=gross)) + geom_point() + facet_wrap(~genre)
+
+
+```
+
+## Ratings vs. Gross Return
+ 
+  We can see a positive, but not very clear relationship when it comes to ratings vs gross return at the box office. There are movies with high ratings making less than similar movies with lower ratings. This would lead us to conclude that ratings are also not the primary determinant of gross return on a movie. 
+
+```{r, gross_on_rating}
+
+ggplot(movies, aes(x=rating, y=gross)) + geom_point() + facet_wrap(~genre) + labs( x = "IMDB Ratings", y = " Gross Returns")
+
+```
+
+
+```{r}
+
+# In order to reproduce the graph shown above we begin by calculating the confidence intervals for the mean ratings of Burton and Spielberg
+
+#We calculate the 95% CI for Spielberg as follows:
+conf_interval_SS <- movies %>% 
+  drop_na() %>% 
+ select(director, rating) %>% 
+  filter(director=="Steven Spielberg") %>% 
+  summarise(mean_rating = mean(rating),
+            sd_rating = sd(rating),
+            count = n(),
+            # get t-critical value with (n-1) degrees of freedom
+            t_critical = qt(0.975, count-1),
+            se_rating = sd(rating)/sqrt(count),
+            margin_of_error = t_critical * se_rating,
+            rating_low = mean_rating - margin_of_error,
+            rating_high = mean_rating + margin_of_error)
+
+
+#We calculate the 95% CI for Burton as follows:
+conf_interval_TB <- movies %>% 
+  drop_na() %>% 
+ select(director, rating) %>% 
+  filter(director=="Tim Burton") %>% 
+  summarise(mean_rating = mean(rating),
+            sd_rating = sd(rating),
+            count = n(),
+            # get t-critical value with (n-1) degrees of freedom
+            t_critical = qt(0.975, count-1),
+            se_rating = sd(rating)/sqrt(count),
+            margin_of_error = t_critical * se_rating,
+            rating_low = mean_rating - margin_of_error,
+            rating_high = mean_rating + margin_of_error)  
+
+
+#We now merge the two data frames so that we can model them on a single graph
+merged_conf <- bind_rows(conf_interval_SS,conf_interval_TB) 
+M1 <- add_column(merged_conf, .before = 1,  Name = c("Tim Burton", "Steven Spielberg"))
+
+
+#We first create a plot with the relevant data mapping
+p1 <- ggplot(M1, aes(x=mean_rating, y=Name, color=Name)) + 
+      #We now add some clarifying features: Titles, axis names and so on
+      labs(title="Do Spielberg and Burton have the same IMDB ratings?", 
+           subtitle = "95% Confidence Intervals overlap", x="Mean IMDB rating", y="") + 
+           theme(legend.position = "none")
+
+
+#Having created the base of the graph we apply the geom_errorbar and geom_rect features to add further functionality
+p1 + geom_point(size=4) + geom_errorbar(aes(xmax=rating_high, xmin=rating_low), width=0.1, size=2) + 
+     geom_rect(xmin=7.27, xmax=7.335, ymin=-4, ymax=7.5, color="grey", fill="grey", alpha=0.3) +
+    #We now add data labels specifying the position of each on the graph 
+     geom_text(aes(label=round(mean_rating, digits= 2)),size=5,hjust=0.5, vjust=-1.5) +
+     geom_text(aes(label=round(rating_high, digits = 2)),hjust=-3.9, vjust=-1.5) +
+     geom_text(aes(label=round(rating_low, digits = 2)),hjust=4.7, vjust=-1.5) 
+
+
+```
+
+
+```{r}
+# Hypothesis Tests for Mean difference 
+
+#Since the two confidence intervals overlap in the analysis above we would like to test the hypothesis 
+# whether or not the mean rating for Steven Spielberg is different from that of Tim Burton.
+
+# In effect we are testing for difference in means. 
+
+# H_0 = M_1 - M_2 = 0 (The two means are not significantly different)
+# H_1 = M_1 - M_2 ≠ 0 (There is statistically significant difference between the two means) 
+
+
+hypothesis_test <- movies %>% 
+  select(director, rating) %>% 
+ filter(director %in% c("Tim Burton","Steven Spielberg")) %>% 
+
+# We first create a simulation of random outcomes using the bootstrap method
+hyp_visualize <- hypothesis_test %>% 
+
+specify(rating ~ director) %>% 
+  hypothesise(null = "independence") %>% 
+  generate(reps = 1000, type = "permute") %>% 
+  calculate(stat = "diff in means", order = c("Tim Burton", "Steven Spielberg"))
+
+hyp_visualize %>% visualise() + geom_rect(xmin=0.975, xmax=1, ymin=10, ymax=200, color="red", fill="red", alpha=0.1)
+
+# We can reject the null hypothesis as we can clearly see that the distribution's tails end at approx. 0.8 and -0.8
+
+# We now calculate a P-value to confirm the results of the simulation
+hyp_visualize %>% 
+get_pvalue(obs_stat =(7.57-6.93) , direction = "both")  
+# The results again indicate that we can reject the null and that there indeed is statistically significant difference between the means
+
+t.test(rating ~ director, data = hypothesis_test)
+# Another metric we would like to look at is the t-stat, which in this instance equals 3, which further indicates a rejection of the null
+
+# Having observed these results consistently across our different approaches we reject the null hypothesis and conclude that there indeed is a difference between the two means.
+
+```
+

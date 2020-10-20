@@ -96,6 +96,12 @@ disqusShortname = ""
       subtitle = "Stock performance in the financial sector"
       image = "stk123.jpg"
       url = "blogs/blog5"
+      
+      [[params.tiles.showcase]]
+      title = "Movie Ratings Analysis"
+      subtitle = "How ratings impact a movie's return on budget?"
+      image = "mvs123.jpg"
+      url = "blogs/blog6"
     
     [[params.tiles.showcase]]
       title = "Aliquam"
