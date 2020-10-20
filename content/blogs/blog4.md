@@ -11,4 +11,4 @@ slug: blog4
 title: Quick Bio & About
 ---
 
-My name is Martin and this year I am a masters Student at London Business School. 
+#My name is Martin and this year I am a masters Student at London Business School. 
