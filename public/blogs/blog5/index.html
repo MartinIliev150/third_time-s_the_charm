@@ -262,23 +262,6 @@ geom_point() + geom_text_repel() + theme(legend.position=&quot;none&quot;) + lab
   theme_bw()+
   NULL</code></pre>
 <p><img src="/blogs/blog5_files/figure-html/unnamed-chunk-2-1.png" width="648" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>myStocks_returns_monthly %&gt;% 
-  tq_performance(Ra = monthly_returns, #the name of the variable containing the returns of the asset
-                 Rb = NULL, 
-                 performance_fun = SharpeRatio) </code></pre>
-<pre><code>## # A tibble: 9 x 4
-## # Groups:   symbol [9]
-##   symbol `ESSharpe(Rf=0%,p=95%~ `StdDevSharpe(Rf=0%,p=95~ `VaRSharpe(Rf=0%,p=95~
-##   &lt;chr&gt;                   &lt;dbl&gt;                     &lt;dbl&gt;                  &lt;dbl&gt;
-## 1 AAPL                  0.179                      0.318                 0.231  
-## 2 JPM                   0.0708                     0.173                 0.106  
-## 3 HAL                   0.00520                    0.0161                0.00995
-## 4 GS                    0.0364                     0.0748                0.0485 
-## 5 KKR                   0.0911                     0.184                 0.125  
-## 6 TSLA                  0.211                      0.301                 0.349  
-## 7 ING                   0.0224                     0.0622                0.0362 
-## 8 CS                   -0.0179                    -0.0422               -0.0231 
-## 9 SPY                   0.128                      0.293                 0.204</code></pre>
 </div>
 </div>
 
