@@ -40,7 +40,17 @@
       <pubDate>Tue, 31 Oct 2017 21:28:43 -0500</pubDate>
       
       <guid>/blogs/blog1/</guid>
-      <description>{r, setup}knitr::opts_chunk$set(message = FALSE, warning = FALSE, tidy=FALSE, # display code as typedsize=&amp;quot;small&amp;quot;) # slightly smaller font for codeoptions(digits = 3)# default figure sizeknitr::opts_chunk$set(fig.width=6.75, fig.height=6.75,fig.align = &amp;quot;center&amp;quot;)library(tidyverse) # Load ggplot2, dplyr, and all the other tidyverse packageslibrary(mosaic)library(ggthemes)library(lubridate)library(fivethirtyeight)library(here)library(skimr)library(janitor)library(vroom)library(tidyquant)library(ggrepel)Returns of financial stocks  You may find useful the material on finance data sources.</description>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Analyzing returns of financial stocks vs SP500</title>
+      <link>/blogs/blog5/</link>
+      <pubDate>Tue, 31 Oct 2017 21:28:43 -0500</pubDate>
+      
+      <guid>/blogs/blog5/</guid>
+      <description>knitr::opts_chunk$set(message = FALSE, warning = FALSE, tidy=FALSE, # display code as typedsize=&amp;quot;small&amp;quot;) # slightly smaller font for codeoptions(digits = 3)# default figure sizeknitr::opts_chunk$set(fig.width=6.75, fig.height=6.75,fig.align = &amp;quot;center&amp;quot;)Returns of financial stocksYou may find useful the material on finance data sources.
+nyse &amp;lt;- read_csv(here::here(&amp;quot;data&amp;quot;,&amp;quot;nyse.csv&amp;quot;))nyse## # A tibble: 508 x 6## symbol name ipo_year sector industry summary_quote ## &amp;lt;chr&amp;gt; &amp;lt;chr&amp;gt; &amp;lt;chr&amp;gt; &amp;lt;chr&amp;gt; &amp;lt;chr&amp;gt; &amp;lt;chr&amp;gt; ## 1 MMM 3M Company n/a Health C~ Medical/Dental In~ https://www.</description>
     </item>
     
   </channel>

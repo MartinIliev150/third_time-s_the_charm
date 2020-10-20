@@ -91,6 +91,12 @@ disqusShortname = ""
     enable = true
     # Display your showcases here.
     
+     [[params.tiles.showcase]]
+      title = "Return on Financial Stocks"
+      subtitle = "Stock performance in the financial sector"
+      image = "stk123.jpg"
+      url = "blogs/blog5"
+    
     [[params.tiles.showcase]]
       title = "Aliquam"
       subtitle = "Ipsum Dolor Sit Amet"

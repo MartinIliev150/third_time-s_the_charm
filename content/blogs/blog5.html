@@ -1,0 +1,172 @@
+---
+categories:
+- ""
+- ""
+date: "2017-10-31T21:28:43-05:00"
+description: "Return of Financial Stocks"
+draft: false
+image: stk123.jpg
+keywords: ""
+slug: blog5
+title: Analyzing returns of financial stocks vs SP500
+---
+
+
+
+<pre class="r"><code>knitr::opts_chunk$set(
+  message = FALSE, 
+  warning = FALSE, 
+  tidy=FALSE,     # display code as typed
+  size=&quot;small&quot;)   # slightly smaller font for code
+options(digits = 3)
+
+# default figure size
+knitr::opts_chunk$set(
+  fig.width=6.75, 
+  fig.height=6.75,
+  fig.align = &quot;center&quot;
+)</code></pre>
+<div id="returns-of-financial-stocks" class="section level1">
+<h1>Returns of financial stocks</h1>
+<blockquote>
+<p>You may find useful the material on <a href="https://mam2021.netlify.app/reference/finance_data/">finance data sources</a>.</p>
+</blockquote>
+<pre class="r"><code>nyse &lt;- read_csv(here::here(&quot;data&quot;,&quot;nyse.csv&quot;))
+nyse</code></pre>
+<pre><code>## # A tibble: 508 x 6
+##    symbol name          ipo_year sector    industry           summary_quote     
+##    &lt;chr&gt;  &lt;chr&gt;         &lt;chr&gt;    &lt;chr&gt;     &lt;chr&gt;              &lt;chr&gt;             
+##  1 MMM    3M Company    n/a      Health C~ Medical/Dental In~ https://www.nasda~
+##  2 ABB    ABB Ltd       n/a      Consumer~ Electrical Produc~ https://www.nasda~
+##  3 ABT    Abbott Labor~ n/a      Health C~ Major Pharmaceuti~ https://www.nasda~
+##  4 ABBV   AbbVie Inc.   2012     Health C~ Major Pharmaceuti~ https://www.nasda~
+##  5 ACN    Accenture plc 2001     Miscella~ Business Services  https://www.nasda~
+##  6 AAP    Advance Auto~ n/a      Consumer~ Other Specialty S~ https://www.nasda~
+##  7 AFL    Aflac Incorp~ n/a      Finance   Accident &amp;Health ~ https://www.nasda~
+##  8 A      Agilent Tech~ 1999     Capital ~ Biotechnology: La~ https://www.nasda~
+##  9 AEM    Agnico Eagle~ n/a      Basic In~ Precious Metals    https://www.nasda~
+## 10 APD    Air Products~ n/a      Basic In~ Major Chemicals    https://www.nasda~
+## # ... with 498 more rows</code></pre>
+<pre class="r"><code>companies_per_sector &lt;- nyse %&gt;%
+    group_by(sector) %&gt;%
+    summarise(No_companies = n(), .groups = &#39;drop&#39;) %&gt;%
+    arrange(desc(No_companies))
+companies_per_sector</code></pre>
+<pre><code>## # A tibble: 12 x 2
+##    sector                No_companies
+##    &lt;chr&gt;                        &lt;int&gt;
+##  1 Finance                         97
+##  2 Consumer Services               79
+##  3 Public Utilities                60
+##  4 Capital Goods                   45
+##  5 Health Care                     45
+##  6 Energy                          42
+##  7 Technology                      40
+##  8 Basic Industries                39
+##  9 Consumer Non-Durables           31
+## 10 Miscellaneous                   12
+## 11 Transportation                  10
+## 12 Consumer Durables                8</code></pre>
+<pre class="r"><code>companies_per_sector %&gt;%
+  slice_max(No_companies, n=12)%&gt;%
+  ggplot(aes(x = No_companies  , y = reorder(sector, No_companies)))+ geom_col(fill=&quot;blue&quot;) + 
+  labs( x = &quot; Number of Companies&quot;, y = &quot; &quot;)</code></pre>
+<p><img src="/blogs/blog5_files/figure-html/companies_per_sector-1.png" width="648" style="display: block; margin: auto;" /></p>
+<p>Next, let’s choose some stocks and their ticker symbols and download some data. You <strong>MUST</strong> choose 6 different stocks from the ones listed below; You should, however, add <code>SPY</code> which is the SP500 ETF (Exchange Traded Fund).</p>
+<pre class="r"><code>myStocks &lt;- c(&quot;AAPL&quot;,&quot;JPM&quot;,&quot;HAL&quot;,&quot;GS&quot;,&quot;KKR&quot;,&quot;TSLA&quot;,&quot;ING&quot;,&quot;CS&quot;, &quot;SPY&quot; ) %&gt;%
+  tq_get(get  = &quot;stock.prices&quot;,
+         from = &quot;2011-01-01&quot;,
+         to   = &quot;2020-08-31&quot;) %&gt;%
+  group_by(symbol) 
+
+glimpse(myStocks) </code></pre>
+<pre><code>## Rows: 21,879
+## Columns: 8
+## Groups: symbol [9]
+## $ symbol   &lt;chr&gt; &quot;AAPL&quot;, &quot;AAPL&quot;, &quot;AAPL&quot;, &quot;AAPL&quot;, &quot;AAPL&quot;, &quot;AAPL&quot;, &quot;AAPL&quot;, &quot;A...
+## $ date     &lt;date&gt; 2011-01-03, 2011-01-04, 2011-01-05, 2011-01-06, 2011-01-0...
+## $ open     &lt;dbl&gt; 11.6, 11.9, 11.8, 12.0, 11.9, 12.1, 12.3, 12.3, 12.3, 12.4...
+## $ high     &lt;dbl&gt; 11.8, 11.9, 11.9, 12.0, 12.0, 12.3, 12.3, 12.3, 12.4, 12.4...
+## $ low      &lt;dbl&gt; 11.6, 11.7, 11.8, 11.9, 11.9, 12.0, 12.1, 12.2, 12.3, 12.3...
+## $ close    &lt;dbl&gt; 11.8, 11.8, 11.9, 11.9, 12.0, 12.2, 12.2, 12.3, 12.3, 12.4...
+## $ volume   &lt;dbl&gt; 4.45e+08, 3.09e+08, 2.56e+08, 3.00e+08, 3.12e+08, 4.49e+08...
+## $ adjusted &lt;dbl&gt; 10.2, 10.2, 10.3, 10.3, 10.4, 10.6, 10.5, 10.6, 10.7, 10.8...</code></pre>
+<pre class="r"><code>#calculate daily returns
+myStocks_returns_daily &lt;- myStocks %&gt;%
+  tq_transmute(select     = adjusted, 
+               mutate_fun = periodReturn, 
+               period     = &quot;daily&quot;, 
+               type       = &quot;log&quot;,
+               col_rename = &quot;daily_returns&quot;,
+               cols = c(nested.col))  
+
+#calculate monthly  returns
+myStocks_returns_monthly &lt;- myStocks %&gt;%
+  tq_transmute(select     = adjusted, 
+               mutate_fun = periodReturn, 
+               period     = &quot;monthly&quot;, 
+               type       = &quot;arithmetic&quot;,
+               col_rename = &quot;monthly_returns&quot;,
+               cols = c(nested.col)) 
+
+#calculate yearly returns
+myStocks_returns_annual &lt;- myStocks %&gt;%
+  group_by(symbol) %&gt;%
+  tq_transmute(select     = adjusted, 
+               mutate_fun = periodReturn, 
+               period     = &quot;yearly&quot;, 
+               type       = &quot;arithmetic&quot;,
+               col_rename = &quot;yearly_returns&quot;,
+               cols = c(nested.col))</code></pre>
+<pre class="r"><code>summarise_monthly_returns &lt;- myStocks_returns_monthly %&gt;%
+  filter(date &gt;= &quot;2017-01-01&quot;)  %&gt;%
+  group_by(symbol) %&gt;%
+  summarize(min = min(monthly_returns), max =max(monthly_returns), median =median(monthly_returns), mean= mean(monthly_returns), sd=sd(monthly_returns), .groups = &#39;drop&#39;)
+summarise_monthly_returns</code></pre>
+<pre><code>## # A tibble: 9 x 6
+##   symbol    min   max   median     mean     sd
+##   &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt;
+## 1 AAPL   -0.181 0.200  0.0513   0.0387  0.0873
+## 2 CS     -0.283 0.142  0.0111   0.00108 0.0828
+## 3 GS     -0.230 0.186  0.00540  0.00144 0.0815
+## 4 HAL    -0.592 0.533 -0.0219  -0.0101  0.162 
+## 5 ING    -0.457 0.219  0.0199  -0.00108 0.111 
+## 6 JPM    -0.225 0.155  0.00911  0.00890 0.0694
+## 7 KKR    -0.179 0.145  0.0400   0.0242  0.0802
+## 8 SPY    -0.125 0.127  0.0183   0.0129  0.0457
+## 9 TSLA   -0.224 0.555  0.0448   0.0699  0.189</code></pre>
+<pre class="r"><code>summ_monthly_returns_plot &lt;- myStocks_returns_monthly %&gt;%
+  filter(date &gt;= &quot;2017-01-01&quot;)  %&gt;%
+  group_by(symbol) 
+ summ_monthly_returns_plot  </code></pre>
+<pre><code>## # A tibble: 396 x 3
+## # Groups:   symbol [9]
+##    symbol date       monthly_returns
+##    &lt;chr&gt;  &lt;date&gt;               &lt;dbl&gt;
+##  1 AAPL   2017-01-31       0.0477   
+##  2 AAPL   2017-02-28       0.134    
+##  3 AAPL   2017-03-31       0.0487   
+##  4 AAPL   2017-04-28      -0.0000697
+##  5 AAPL   2017-05-31       0.0678   
+##  6 AAPL   2017-06-30      -0.0572   
+##  7 AAPL   2017-07-31       0.0327   
+##  8 AAPL   2017-08-31       0.107    
+##  9 AAPL   2017-09-29      -0.0602   
+## 10 AAPL   2017-10-31       0.0968   
+## # ... with 386 more rows</code></pre>
+<pre class="r"><code>ggplot(summ_monthly_returns_plot, aes(x = monthly_returns, color = symbol))+ geom_density() +labs( x = &quot; Returns&quot;, y = &quot; Density&quot;)+facet_wrap(~symbol)</code></pre>
+<p><img src="/blogs/blog5_files/figure-html/density_monthly_returns-1.png" width="648" style="display: block; margin: auto;" /></p>
+<div id="distribution-of-returns-and-risk" class="section level2">
+<h2>Distribution of Returns and Risk</h2>
+<p>The spread of returns (a.k.a the standard deviation) is the most widely used form of risk measure when it comes to stock market performance. The narrower the spread the less risk is involved. From the above graph we can see that the SPY is the safest among the chosen instruments, but that is hardly surprising given the fact that an index aggregates the performance of a wide basket of securities.</p>
+<p>One of the most risky assets on the graph above is Tesla Inc., as indicated by the spread of its returns. Keeping this in mind its also worthwhile to note that riskier stocks also carry the potential for a higher reward, as indicated by the considerable density of the Tesla distribution at and above 3%, compared to the almost zero density of the SPY at the same mark.</p>
+<pre class="r"><code>ggplot(data= summarise_monthly_returns, mapping = aes(x = sd, y = mean, color = symbol, label= symbol)) +
+geom_point() + geom_text_repel() + theme(legend.position=&quot;none&quot;) + labs( x = &quot; Risk &quot;, y = &quot; Return&quot;)</code></pre>
+<p><img src="/blogs/blog5_files/figure-html/risk_return_plot-1.png" width="648" style="display: block; margin: auto;" /></p>
+</div>
+<div id="risk-vs-return-trade-off" class="section level2">
+<h2>Risk vs Return Trade Off</h2>
+<p>The risk return relationship is best exemplified by the graph above, which is a scater plot of the expected return vs standard deviation of said returns for specific securities. Ideally an investor would like to get a high return for a considerably low amount of risk, and position himself in the top left quadrant of the graph.</p>
+<p>On the other hand, every investor would avoid the lower right quadrant, which equals low expected returns and high risk. There are also those securities which although bearing a similar amount of risk, have different expected returns. For example - Goldman Sachs Inc. and Apple have roughly the same risk profile, and yet Apple’s expected return is much higher than that of GS.</p>
+</div>
+</div>
