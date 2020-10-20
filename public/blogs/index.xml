@@ -36,11 +36,11 @@
     
     <item>
       <title>Analyzing returns of financial stocks vs S&amp;P500</title>
-      <link>/blogs/ipsum/</link>
+      <link>/blogs/blog1/</link>
       <pubDate>Tue, 31 Oct 2017 21:28:43 -0500</pubDate>
       
-      <guid>/blogs/ipsum/</guid>
-      <description>knitr::opts_chunk$set(message = FALSE, warning = FALSE, tidy=FALSE, # display code as typedsize=&amp;quot;small&amp;quot;) # slightly smaller font for codeoptions(digits = 3)# default figure sizeknitr::opts_chunk$set(fig.width=6.75, fig.height=6.75,fig.align = &amp;quot;center&amp;quot;)library(tidyverse) # Load ggplot2, dplyr, and all the other tidyverse packageslibrary(mosaic)library(ggthemes)library(lubridate)library(fivethirtyeight)library(here)library(skimr)library(janitor)library(vroom)library(tidyquant)library(ggrepel)Returns of financial stocks  You may find useful the material on finance data sources.</description>
+      <guid>/blogs/blog1/</guid>
+      <description>{r, setup}knitr::opts_chunk$set(message = FALSE, warning = FALSE, tidy=FALSE, # display code as typedsize=&amp;quot;small&amp;quot;) # slightly smaller font for codeoptions(digits = 3)# default figure sizeknitr::opts_chunk$set(fig.width=6.75, fig.height=6.75,fig.align = &amp;quot;center&amp;quot;)library(tidyverse) # Load ggplot2, dplyr, and all the other tidyverse packageslibrary(mosaic)library(ggthemes)library(lubridate)library(fivethirtyeight)library(here)library(skimr)library(janitor)library(vroom)library(tidyquant)library(ggrepel)Returns of financial stocks  You may find useful the material on finance data sources.</description>
     </item>
     
   </channel>
