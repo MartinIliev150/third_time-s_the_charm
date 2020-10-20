@@ -197,7 +197,7 @@ disqusShortname = ""
 
     [[params.footer.social]]
       icon = "fa-facebook"
-      url= "https://www.facebook.com"
+      url= "https://www.facebook.com/martin.iliev.520/"
       label = "Facebook"
 
     [[params.footer.social]]
@@ -212,7 +212,7 @@ disqusShortname = ""
 
     [[params.footer.social]]
       icon = "fa-linkedin"
-      url= "https://www.linkedin.com"
+      url= "https://www.linkedin.com/in/martin-iliev-b99559135/"
       label = "LinkedIn"
 
     [[params.footer.quicklinks]]
