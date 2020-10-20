@@ -1,0 +1,1848 @@
+---
+categories:
+- ""
+- ""
+date: "2017-10-31T21:28:43-05:00"
+description: ""
+draft: false
+image: mvs123.jpg
+keywords: ""
+slug: blog6
+title: ARatings and movie budgets
+---
+
+
+
+<pre class="r"><code>knitr::opts_chunk$set(
+  message = FALSE, 
+  warning = FALSE, 
+  tidy=FALSE,     # display code as typed
+  size=&quot;small&quot;)   # slightly smaller font for code
+options(digits = 3)
+
+# default figure size
+knitr::opts_chunk$set(
+  fig.width=6.75, 
+  fig.height=6.75,
+  fig.align = &quot;center&quot;
+)</code></pre>
+<div id="analysis-of-movies--imdb-dataset" class="section level1">
+<h1>Analysis of movies- IMDB dataset</h1>
+<pre class="r"><code>movies &lt;- read_csv(here::here(&quot;data&quot;, &quot;movies.csv&quot;))
+glimpse(movies)</code></pre>
+<pre><code>## Rows: 2,961
+## Columns: 11
+## $ title               &lt;chr&gt; &quot;Avatar&quot;, &quot;Titanic&quot;, &quot;Jurassic World&quot;, &quot;The Ave...
+## $ genre               &lt;chr&gt; &quot;Action&quot;, &quot;Drama&quot;, &quot;Action&quot;, &quot;Action&quot;, &quot;Action&quot;...
+## $ director            &lt;chr&gt; &quot;James Cameron&quot;, &quot;James Cameron&quot;, &quot;Colin Trevor...
+## $ year                &lt;dbl&gt; 2009, 1997, 2015, 2012, 2008, 1999, 1977, 2015,...
+## $ duration            &lt;dbl&gt; 178, 194, 124, 173, 152, 136, 125, 141, 164, 93...
+## $ gross               &lt;dbl&gt; 7.61e+08, 6.59e+08, 6.52e+08, 6.23e+08, 5.33e+0...
+## $ budget              &lt;dbl&gt; 2.37e+08, 2.00e+08, 1.50e+08, 2.20e+08, 1.85e+0...
+## $ cast_facebook_likes &lt;dbl&gt; 4834, 45223, 8458, 87697, 57802, 37723, 13485, ...
+## $ votes               &lt;dbl&gt; 886204, 793059, 418214, 995415, 1676169, 534658...
+## $ reviews             &lt;dbl&gt; 3777, 2843, 1934, 2425, 5312, 3917, 1752, 1752,...
+## $ rating              &lt;dbl&gt; 7.9, 7.7, 7.0, 8.1, 9.0, 6.5, 8.7, 7.5, 8.5, 7....</code></pre>
+<p>Besides the obvious variables of <code>title</code>, <code>genre</code>, <code>director</code>, <code>year</code>, and <code>duration</code>, the rest of the variables are as follows:</p>
+<ul>
+<li><code>gross</code> : The gross earnings in the US box office, not adjusted for inflation</li>
+<li><code>budget</code>: The movie’s budget</li>
+<li><code>cast_facebook_likes</code>: the number of facebook likes cast memebrs received</li>
+<li><code>votes</code>: the number of people who voted for (or rated) the movie in IMDB</li>
+<li><code>reviews</code>: the number of reviews for that movie</li>
+<li><code>rating</code>: IMDB average rating</li>
+</ul>
+<pre class="r"><code>glimpse(movies)</code></pre>
+<pre><code>## Rows: 2,961
+## Columns: 11
+## $ title               &lt;chr&gt; &quot;Avatar&quot;, &quot;Titanic&quot;, &quot;Jurassic World&quot;, &quot;The Ave...
+## $ genre               &lt;chr&gt; &quot;Action&quot;, &quot;Drama&quot;, &quot;Action&quot;, &quot;Action&quot;, &quot;Action&quot;...
+## $ director            &lt;chr&gt; &quot;James Cameron&quot;, &quot;James Cameron&quot;, &quot;Colin Trevor...
+## $ year                &lt;dbl&gt; 2009, 1997, 2015, 2012, 2008, 1999, 1977, 2015,...
+## $ duration            &lt;dbl&gt; 178, 194, 124, 173, 152, 136, 125, 141, 164, 93...
+## $ gross               &lt;dbl&gt; 7.61e+08, 6.59e+08, 6.52e+08, 6.23e+08, 5.33e+0...
+## $ budget              &lt;dbl&gt; 2.37e+08, 2.00e+08, 1.50e+08, 2.20e+08, 1.85e+0...
+## $ cast_facebook_likes &lt;dbl&gt; 4834, 45223, 8458, 87697, 57802, 37723, 13485, ...
+## $ votes               &lt;dbl&gt; 886204, 793059, 418214, 995415, 1676169, 534658...
+## $ reviews             &lt;dbl&gt; 3777, 2843, 1934, 2425, 5312, 3917, 1752, 1752,...
+## $ rating              &lt;dbl&gt; 7.9, 7.7, 7.0, 8.1, 9.0, 6.5, 8.7, 7.5, 8.5, 7....</code></pre>
+<pre class="r"><code>skim(movies)</code></pre>
+<table>
+<caption><span id="tab:unnamed-chunk-1">Table 1: </span>Data summary</caption>
+<tbody>
+<tr class="odd">
+<td align="left">Name</td>
+<td align="left">movies</td>
+</tr>
+<tr class="even">
+<td align="left">Number of rows</td>
+<td align="left">2961</td>
+</tr>
+<tr class="odd">
+<td align="left">Number of columns</td>
+<td align="left">11</td>
+</tr>
+<tr class="even">
+<td align="left">_______________________</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Column type frequency:</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">character</td>
+<td align="left">3</td>
+</tr>
+<tr class="odd">
+<td align="left">numeric</td>
+<td align="left">8</td>
+</tr>
+<tr class="even">
+<td align="left">________________________</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Group variables</td>
+<td align="left">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: character</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="right">min</th>
+<th align="right">max</th>
+<th align="right">empty</th>
+<th align="right">n_unique</th>
+<th align="right">whitespace</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">title</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">83</td>
+<td align="right">0</td>
+<td align="right">2907</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">genre</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">5</td>
+<td align="right">11</td>
+<td align="right">0</td>
+<td align="right">17</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">director</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">3</td>
+<td align="right">32</td>
+<td align="right">0</td>
+<td align="right">1366</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: numeric</strong></p>
+<table>
+<colgroup>
+<col width="13%" />
+<col width="6%" />
+<col width="9%" />
+<col width="6%" />
+<col width="6%" />
+<col width="4%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+<col width="6%" />
+<col width="28%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="right">mean</th>
+<th align="right">sd</th>
+<th align="right">p0</th>
+<th align="right">p25</th>
+<th align="right">p50</th>
+<th align="right">p75</th>
+<th align="right">p100</th>
+<th align="left">hist</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">year</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">2.00e+03</td>
+<td align="right">9.95e+00</td>
+<td align="right">1920.0</td>
+<td align="right">2.00e+03</td>
+<td align="right">2.00e+03</td>
+<td align="right">2.01e+03</td>
+<td align="right">2.02e+03</td>
+<td align="left">▁▁▁▂▇</td>
+</tr>
+<tr class="even">
+<td align="left">duration</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1.10e+02</td>
+<td align="right">2.22e+01</td>
+<td align="right">37.0</td>
+<td align="right">9.50e+01</td>
+<td align="right">1.06e+02</td>
+<td align="right">1.19e+02</td>
+<td align="right">3.30e+02</td>
+<td align="left">▃▇▁▁▁</td>
+</tr>
+<tr class="odd">
+<td align="left">gross</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">5.81e+07</td>
+<td align="right">7.25e+07</td>
+<td align="right">703.0</td>
+<td align="right">1.23e+07</td>
+<td align="right">3.47e+07</td>
+<td align="right">7.56e+07</td>
+<td align="right">7.61e+08</td>
+<td align="left">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td align="left">budget</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">4.06e+07</td>
+<td align="right">4.37e+07</td>
+<td align="right">218.0</td>
+<td align="right">1.10e+07</td>
+<td align="right">2.60e+07</td>
+<td align="right">5.50e+07</td>
+<td align="right">3.00e+08</td>
+<td align="left">▇▂▁▁▁</td>
+</tr>
+<tr class="odd">
+<td align="left">cast_facebook_likes</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1.24e+04</td>
+<td align="right">2.05e+04</td>
+<td align="right">0.0</td>
+<td align="right">2.24e+03</td>
+<td align="right">4.60e+03</td>
+<td align="right">1.69e+04</td>
+<td align="right">6.57e+05</td>
+<td align="left">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td align="left">votes</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1.09e+05</td>
+<td align="right">1.58e+05</td>
+<td align="right">5.0</td>
+<td align="right">1.99e+04</td>
+<td align="right">5.57e+04</td>
+<td align="right">1.33e+05</td>
+<td align="right">1.69e+06</td>
+<td align="left">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td align="left">reviews</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">5.03e+02</td>
+<td align="right">4.94e+02</td>
+<td align="right">2.0</td>
+<td align="right">1.99e+02</td>
+<td align="right">3.64e+02</td>
+<td align="right">6.31e+02</td>
+<td align="right">5.31e+03</td>
+<td align="left">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td align="left">rating</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">6.39e+00</td>
+<td align="right">1.05e+00</td>
+<td align="right">1.6</td>
+<td align="right">5.80e+00</td>
+<td align="right">6.50e+00</td>
+<td align="right">7.10e+00</td>
+<td align="right">9.30e+00</td>
+<td align="left">▁▁▆▇▁</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>movies %&gt;%
+group_by(genre) %&gt;%
+count(sort = TRUE)</code></pre>
+<pre><code>## # A tibble: 17 x 2
+## # Groups:   genre [17]
+##    genre           n
+##    &lt;chr&gt;       &lt;int&gt;
+##  1 Comedy        848
+##  2 Action        738
+##  3 Drama         498
+##  4 Adventure     288
+##  5 Crime         202
+##  6 Biography     135
+##  7 Horror        131
+##  8 Animation      35
+##  9 Fantasy        28
+## 10 Documentary    25
+## 11 Mystery        16
+## 12 Sci-Fi          7
+## 13 Family          3
+## 14 Musical         2
+## 15 Romance         2
+## 16 Western         2
+## 17 Thriller        1</code></pre>
+<pre class="r"><code>gross_budget_by_genre &lt;- movies %&gt;% 
+  select(genre, gross, budget)
+Budget_by_genre &lt;- aggregate(gross_budget_by_genre[ ,2:3],list(gross_budget_by_genre$genre), mean)
+
+return_on_budget &lt;- Budget_by_genre
+return_on_budget$return &lt;- return_on_budget$gross/return_on_budget$bud
+
+get</code></pre>
+<pre><code>## function (x, pos = -1L, envir = as.environment(pos), mode = &quot;any&quot;, 
+##     inherits = TRUE) 
+## .Internal(get(x, envir, mode, inherits))
+## &lt;bytecode: 0x0000000007c77170&gt;
+## &lt;environment: namespace:base&gt;</code></pre>
+<pre class="r"><code>print(return_on_budget)</code></pre>
+<pre><code>##        Group.1    gross   budget   return
+## 1       Action 8.66e+07 71354888  1.21343
+## 2    Adventure 9.58e+07 66290069  1.44508
+## 3    Animation 9.84e+07 61701429  1.59532
+## 4    Biography 4.52e+07 28543696  1.58360
+## 5       Comedy 4.26e+07 24446319  1.74384
+## 6        Crime 3.75e+07 26596169  1.41007
+## 7  Documentary 1.74e+07  5887852  2.94742
+## 8        Drama 3.75e+07 26242933  1.42764
+## 9       Family 1.49e+08 14833333 10.05576
+## 10     Fantasy 4.24e+07 17582143  2.41204
+## 11      Horror 3.77e+07 13504916  2.79259
+## 12     Musical 9.21e+07  3189500 28.87098
+## 13     Mystery 6.75e+07 39218750  1.72196
+## 14     Romance 3.13e+07 25107500  1.24524
+## 15      Sci-Fi 2.98e+07 27607143  1.07901
+## 16    Thriller 2.47e+03   300000  0.00823
+## 17     Western 2.08e+07  3465000  6.00920</code></pre>
+<pre class="r"><code>Director &lt;- movies %&gt;%
+  select(director,gross)
+Director_combined &lt;- aggregate(Director$gross,list(Director$director), sum)
+Director_Mean &lt;- aggregate(Director$gross,list(Director$director), mean)
+Director_combined$Mean &lt;- Director_Mean[, 2]
+Director_Stdev &lt;- aggregate(Director$gross,list(Director$director), sd)
+Director_combined$SD &lt;- Director_Stdev[, 2]
+Director_Median &lt;- aggregate(Director$gross,list(Director$director), median)
+Director_combined$Median &lt;- Director_Median[, 2]
+
+Director_combined &lt;- Director_combined[with(Director_combined,order(-Director_combined$x)), ]
+print(Director_combined)</code></pre>
+<pre><code>##                               Group.1        x     Mean       SD   Median
+## 1234                 Steven Spielberg 4.01e+09 1.75e+08 1.01e+08 1.64e+08
+## 862                       Michael Bay 2.23e+09 1.72e+08 1.27e+08 1.38e+08
+## 1268                       Tim Burton 2.07e+09 1.29e+08 1.09e+08 7.65e+07
+## 1162                        Sam Raimi 2.01e+09 2.01e+08 1.62e+08 2.35e+08
+## 514                     James Cameron 1.91e+09 3.18e+08 3.09e+08 1.76e+08
+## 209                 Christopher Nolan 1.81e+09 2.27e+08 1.87e+08 1.97e+08
+## 430                      George Lucas 1.74e+09 3.48e+08 1.46e+08 3.80e+08
+## 1122                  Robert Zemeckis 1.62e+09 1.25e+08 9.13e+07 1.01e+08
+## 217                    Clint Eastwood 1.38e+09 7.25e+07 7.55e+07 4.67e+07
+## 388                  Francis Lawrence 1.36e+09 2.72e+08 1.35e+08 2.82e+08
+## 1138                       Ron Howard 1.34e+09 1.11e+08 8.19e+07 1.02e+08
+## 447                    Gore Verbinski 1.33e+09 1.90e+08 1.54e+08 1.23e+08
+## 48                     Andrew Adamson 1.14e+09 2.84e+08 1.21e+08 2.80e+08
+## 1186                       Shawn Levy 1.13e+09 1.03e+08 6.55e+07 8.55e+07
+## 1088                     Ridley Scott 1.13e+09 8.06e+07 6.88e+07 4.78e+07
+## 703                       Joss Whedon 1.11e+09 3.69e+08 3.09e+08 4.59e+08
+## 1025                    Peter Jackson 1.06e+09 2.13e+08 1.60e+08 2.58e+08
+## 635                     John Lasseter 1.04e+09 2.07e+08 3.64e+07 1.92e+08
+## 1233                Steven Soderbergh 1.03e+09 6.88e+07 5.80e+07 3.73e+07
+## 793                M. Night Shyamalan 1.03e+09 1.29e+08 8.83e+07 1.05e+08
+## 545                         Jay Roach 1.00e+09 1.67e+08 8.41e+07 1.86e+08
+## 1010                      Pete Docter 9.39e+08 3.13e+08 3.76e+07 2.93e+08
+## 1366                      Zack Snyder 9.39e+08 1.34e+08 1.23e+08 5.89e+07
+## 187                    Chris Columbus 9.36e+08 1.34e+08 9.44e+07 9.10e+07
+## 91                   Barry Sonnenfeld 9.26e+08 1.32e+08 8.10e+07 1.14e+08
+## 158                      Bryan Singer 9.18e+08 1.31e+08 7.62e+07 1.55e+08
+## 835                   Martin Scorsese 9.15e+08 5.72e+07 4.60e+07 4.96e+07
+## 1303                      Tom Shadyac 8.90e+08 1.27e+08 7.01e+07 1.29e+08
+## 1287                    Todd Phillips 8.81e+08 1.26e+08 9.93e+07 8.82e+07
+## 1313                       Tony Scott 8.72e+08 8.72e+07 5.16e+07 8.21e+07
+## 276                     David Fincher 8.64e+08 8.64e+07 4.30e+07 9.61e+07
+## 315                      Dennis Dugan 8.52e+08 9.47e+07 5.18e+07 1.00e+08
+## 662                       Jon Favreau 8.37e+08 1.67e+08 1.50e+08 1.73e+08
+## 126                         Brad Bird 7.94e+08 1.59e+08 9.75e+07 2.06e+08
+## 527                         James Wan 7.92e+08 1.13e+08 1.12e+08 8.36e+07
+## 1134                  Roland Emmerich 7.82e+08 1.30e+08 1.05e+08 1.08e+08
+## 367                      Eric Darnell 7.63e+08 1.53e+08 6.14e+07 1.80e+08
+## 406                    Garry Marshall 7.55e+08 9.44e+07 5.53e+07 1.02e+08
+## 503                       J.J. Abrams 7.47e+08 1.87e+08 6.64e+07 1.81e+08
+## 1092                        Rob Cohen 7.45e+08 7.45e+07 5.23e+07 4.34e+07
+## 73                      Anthony Russo 7.43e+08 1.86e+08 1.84e+08 1.68e+08
+## 1273                      Tim Johnson 6.87e+08 1.72e+08 1.12e+07 1.77e+08
+## 55                     Andrew Stanton 6.78e+08 2.26e+08 1.54e+08 2.24e+08
+## 606                   Joel Schumacher 6.70e+08 7.44e+07 5.47e+07 6.15e+07
+## 167                   Carlos Saldanha 6.67e+08 1.67e+08 3.41e+07 1.69e+08
+## 1050                     Raja Gosnell 6.63e+08 1.11e+08 3.29e+07 1.06e+08
+## 137                      Brett Ratner 6.62e+08 9.46e+07 6.80e+07 7.58e+07
+## 221                   Colin Trevorrow 6.56e+08 3.28e+08 4.58e+08 3.28e+08
+## 1030                      Peter Segal 6.36e+08 9.08e+07 5.48e+07 1.21e+08
+## 726                   Kenneth Branagh 6.34e+08 1.58e+08 7.26e+07 1.91e+08
+## 1047                Quentin Tarantino 6.24e+08 7.80e+07 5.04e+07 6.82e+07
+## 90                     Barry Levinson 6.24e+08 4.80e+07 5.14e+07 3.74e+07
+## 683                Jonathan Liebesman 6.21e+08 1.03e+08 7.11e+07 8.36e+07
+## 1042                    Pierre Coffin 6.20e+08 3.10e+08 8.24e+07 3.10e+08
+## 1360                Wolfgang Petersen 6.17e+08 1.23e+08 5.71e+07 1.33e+08
+## 1095                     Rob Marshall 6.16e+08 1.23e+08 8.84e+07 1.28e+08
+## 1277                        Tim Story 5.89e+08 9.81e+07 2.88e+07 9.12e+07
+## 123                    Bobby Farrelly 5.84e+08 6.48e+07 4.96e+07 4.50e+07
+## 1115                 Robert Rodriguez 5.83e+08 4.86e+07 3.61e+07 3.89e+07
+## 993                         Paul Feig 5.82e+08 1.16e+08 6.04e+07 1.18e+08
+## 641                    John McTiernan 5.80e+08 6.44e+07 3.27e+07 5.97e+07
+## 786                   Louis Leterrier 5.79e+08 1.45e+08 2.25e+07 1.49e+08
+## 672                    Jon Turteltaub 5.77e+08 8.25e+07 4.49e+07 6.89e+07
+## 1070                   Richard Donner 5.69e+08 8.13e+07 5.68e+07 7.61e+07
+## 532                       Jan de Bont 5.68e+08 1.14e+08 7.67e+07 9.12e+07
+## 387              Francis Ford Coppola 5.59e+08 6.21e+07 3.42e+07 5.73e+07
+## 933                      Nancy Meyers 5.59e+08 1.12e+08 4.72e+07 1.13e+08
+## 522                     James Mangold 5.54e+08 6.93e+07 3.75e+07 5.25e+07
+## 413                         Gary Ross 5.49e+08 1.83e+08 2.01e+08 1.20e+08
+## 757                    Lana Wachowski 5.48e+08 1.10e+08 1.15e+08 4.74e+07
+## 62                       Andy Tennant 5.47e+08 9.12e+07 5.12e+07 6.86e+07
+## 1099                       Rob Reiner 5.47e+08 4.97e+07 4.40e+07 3.09e+07
+## 994                   Paul Greengrass 5.42e+08 1.35e+08 8.50e+07 1.42e+08
+## 307                      Dean DeBlois 5.40e+08 1.80e+08 3.59e+07 1.77e+08
+## 499                      Ivan Reitman 5.35e+08 6.69e+07 3.10e+07 7.25e+07
+## 6                          Adam McKay 5.24e+08 8.74e+07 4.99e+07 9.23e+07
+## 1062                     Renny Harlin 5.24e+08 3.74e+07 3.36e+07 2.80e+07
+## 9                       Adam Shankman 5.24e+08 8.73e+07 4.02e+07 9.63e+07
+## 1014                       Peter Berg 5.23e+08 8.72e+07 7.86e+07 5.64e+07
+## 291                  David O. Russell 5.21e+08 7.44e+07 5.37e+07 6.07e+07
+## 335                        Doug Liman 5.19e+08 7.41e+07 6.81e+07 8.02e+07
+## 389                      Frank Coraci 5.19e+08 7.41e+07 5.52e+07 4.63e+07
+## 1346                       Wes Craven 5.14e+08 4.68e+07 3.50e+07 2.65e+07
+## 1127                     Roger Allers 5.07e+08 2.54e+08 2.39e+08 2.54e+08
+## 1056          Rawson Marshall Thurber 5.05e+08 1.26e+08 1.70e+07 1.20e+08
+## 919                     Mike Mitchell 5.01e+08 1.25e+08 8.20e+07 9.93e+07
+## 806                         Marc Webb 4.97e+08 1.66e+08 1.19e+08 2.03e+08
+## 1190                       Simon West 4.97e+08 7.10e+07 4.66e+07 8.50e+07
+## 658                          John Woo 4.93e+08 9.86e+07 7.06e+07 7.04e+07
+## 597                      Joe Johnston 4.87e+08 1.22e+08 6.60e+07 1.22e+08
+## 378                      F. Gary Gray 4.86e+08 6.95e+07 4.94e+07 5.58e+07
+## 853                               McG 4.80e+08 8.00e+07 4.23e+07 7.77e+07
+## 171               Catherine Hardwicke 4.74e+08 7.90e+07 8.82e+07 3.76e+07
+## 1116                 Robert Schwentke 4.73e+08 7.88e+07 3.26e+07 7.79e+07
+## 140                    Brian De Palma 4.72e+08 5.90e+07 5.48e+07 5.01e+07
+## 191                      Chris Miller 4.70e+08 2.35e+08 1.21e+08 2.35e+08
+## 74                      Antoine Fuqua 4.66e+08 5.82e+07 3.10e+07 4.97e+07
+## 1033                      Peyton Reed 4.65e+08 1.16e+08 4.74e+07 1.08e+08
+## 1036                        Phil Lord 4.55e+08 1.52e+08 3.53e+07 1.38e+08
+## 1245                   Sydney Pollack 4.54e+08 1.13e+08 6.72e+07 1.23e+08
+## 1040                    Phillip Noyce 4.51e+08 9.03e+07 2.85e+07 8.33e+07
+## 462                       Guy Ritchie 4.41e+08 1.47e+08 8.87e+07 1.87e+08
+## 636                  John Lee Hancock 4.37e+08 1.09e+08 1.01e+08 7.94e+07
+## 974                      Oliver Stone 4.37e+08 4.37e+07 2.46e+07 4.56e+07
+## 105                      Betty Thomas 4.34e+08 1.08e+08 9.02e+07 9.06e+07
+## 692                   Joseph Kosinski 4.33e+08 1.44e+08 4.79e+07 1.72e+08
+## 197                       Chris Weitz 4.33e+08 1.08e+08 1.29e+08 6.71e+07
+## 539                     Jason Reitman 4.25e+08 7.09e+07 6.18e+07 5.43e+07
+## 107                       Bill Condon 4.15e+08 8.31e+07 1.24e+08 1.02e+07
+## 769                       Lee Unkrich 4.15e+08 4.15e+08       NA 4.15e+08
+## 1183                      Shane Black 4.13e+08 2.07e+08 2.86e+08 2.07e+08
+## 471                      Harold Ramis 4.12e+08 5.15e+07 2.74e+07 4.16e+07
+## 196                       Chris Wedge 4.12e+08 1.37e+08 3.53e+07 1.28e+08
+## 710                        Justin Lin 4.07e+08 8.13e+07 8.93e+07 6.25e+07
+## 1094                    Rob Letterman 4.01e+08 1.00e+08 6.77e+07 8.00e+07
+## 184                        Chris Buck 4.01e+08 4.01e+08       NA 4.01e+08
+## 63                            Ang Lee 3.99e+08 5.70e+07 5.66e+07 4.27e+07
+## 830                       Mark Waters 3.94e+08 6.57e+07 3.40e+07 6.97e+07
+## 1211                  Stephen Sommers 3.87e+08 9.69e+07 9.41e+07 8.71e+07
+## 211                     Chuck Russell 3.86e+08 7.71e+07 3.85e+07 9.03e+07
+## 1032                       Peter Weir 3.81e+08 9.52e+07 2.46e+07 9.49e+07
+## 68                      Anne Fletcher 3.78e+08 7.55e+07 5.26e+07 6.53e+07
+## 704                       Judd Apatow 3.77e+08 9.43e+07 4.36e+07 8.84e+07
+## 374                        Ethan Coen 3.68e+08 6.13e+07 5.95e+07 5.00e+07
+## 60                       Andy Fickman 3.65e+08 6.09e+07 2.56e+07 6.91e+07
+## 880                      Michael Mann 3.64e+08 6.06e+07 3.71e+07 6.53e+07
+## 353                      Edward Zwick 3.64e+08 5.19e+07 3.04e+07 4.09e+07
+## 1275                       Tim Miller 3.63e+08 3.63e+08       NA 3.63e+08
+## 668                        Jon M. Chu 3.61e+08 7.21e+07 3.03e+07 6.47e+07
+## 1136                     Ron Clements 3.60e+08 1.20e+08 9.06e+07 1.04e+08
+## 1271                         Tim Hill 3.59e+08 8.97e+07 9.53e+07 6.27e+07
+## 164                     Cameron Crowe 3.56e+08 5.93e+07 5.53e+07 2.97e+07
+## 773                     Leonard Nimoy 3.54e+08 1.18e+08 4.62e+07 1.10e+08
+## 1321                      Tyler Perry 3.48e+08 5.81e+07 5.79e+06 5.76e+07
+## 395                          Frank Oz 3.44e+08 4.91e+07 2.25e+07 5.95e+07
+## 653                    John Singleton 3.43e+08 5.72e+07 3.93e+07 4.31e+07
+## 1181                  Seth MacFarlane 3.43e+08 1.14e+08 9.25e+07 8.13e+07
+## 803                      Marc Forster 3.42e+08 5.70e+07 7.35e+07 3.57e+07
+## 300                       David Slade 3.41e+08 1.14e+08 1.63e+08 3.96e+07
+## 334                     Donald Petrie 3.41e+08 4.26e+07 4.08e+07 2.71e+07
+## 277                     David Frankel 3.39e+08 8.47e+07 6.18e+07 9.41e+07
+## 267                        David Ayer 3.39e+08 4.84e+07 5.71e+07 2.64e+07
+## 756                        Kyle Balda 3.36e+08 3.36e+08       NA 3.36e+08
+## 1006                       Paul Weitz 3.35e+08 5.58e+07 5.72e+07 3.17e+07
+## 519                        James Gunn 3.33e+08 1.67e+08 2.35e+08 1.67e+08
+## 146                      Brian Levant 3.33e+08 6.66e+07 4.23e+07 6.06e+07
+## 833                   Martin Campbell 3.29e+08 6.57e+07 4.35e+07 6.85e+07
+## 1195                        Spike Lee 3.29e+08 2.19e+07 2.24e+07 1.45e+07
+## 832                      Martin Brest 3.23e+08 8.09e+07 1.04e+08 4.15e+07
+## 460                Guillermo del Toro 3.18e+08 7.96e+07 1.76e+07 7.87e+07
+## 421                Genndy Tartakovsky 3.18e+08 1.59e+08 1.51e+07 1.59e+08
+## 235                       D.J. Caruso 3.17e+08 6.34e+07 3.87e+07 8.01e+07
+## 1167                 Scott Derrickson 3.12e+08 6.25e+07 2.21e+07 7.51e+07
+## 50                       Andrew Davis 3.12e+08 7.80e+07 7.32e+07 5.37e+07
+## 10                        Adrian Lyne 3.11e+08 7.78e+07 6.37e+07 7.38e+07
+## 305                      David Zucker 3.10e+08 6.20e+07 4.73e+07 8.69e+07
+## 1079                 Richard Marquand 3.09e+08 3.09e+08       NA 3.09e+08
+## 33                        Alex Proyas 3.07e+08 7.66e+07 4.97e+07 6.53e+07
+## 128                       Brad Peyton 3.03e+08 1.01e+08 5.59e+07 1.04e+08
+## 626                  John G. Avildsen 2.99e+08 9.96e+07 1.53e+07 9.08e+07
+## 949                  Nicholas Stoller 2.97e+08 7.42e+07 5.26e+07 5.91e+07
+## 676                    Jonathan Demme 2.97e+08 7.42e+07 4.44e+07 7.16e+07
+## 23                        Alan Taylor 2.96e+08 1.48e+08 8.25e+07 1.48e+08
+## 1216                       Steve Carr 2.95e+08 7.38e+07 4.30e+07 8.07e+07
+## 1220                    Steve Martino 2.91e+08 1.46e+08 2.20e+07 1.46e+08
+## 596                         Joe Dante 2.91e+08 5.82e+07 5.20e+07 4.15e+07
+## 741                    Kevin Reynolds 2.91e+08 7.27e+07 7.16e+07 6.26e+07
+## 497                    Irvin Kershner 2.90e+08 2.90e+08       NA 2.90e+08
+## 607                        Joel Zwick 2.90e+08 1.45e+08 1.37e+08 1.45e+08
+## 845                       Matt Reeves 2.89e+08 1.44e+08 9.09e+07 1.44e+08
+## 561                     Jeff Tremaine 2.83e+08 9.45e+07 2.73e+07 1.02e+08
+## 1097                      Rob Minkoff 2.77e+08 6.93e+07 3.56e+07 7.03e+07
+## 1008                   Penny Marshall 2.77e+08 6.91e+07 4.87e+07 6.86e+07
+## 244                       Dan Scanlon 2.68e+08 2.68e+08       NA 2.68e+08
+## 1159                       Sam Mendes 2.66e+08 6.66e+07 5.95e+07 6.35e+07
+## 435                   George Roy Hill 2.62e+08 1.31e+08 4.05e+07 1.31e+08
+## 735                     Kevin Costner 2.60e+08 8.67e+07 8.69e+07 5.83e+07
+## 98                        Ben Stiller 2.58e+08 6.44e+07 3.39e+07 5.92e+07
+## 461                      Gus Van Sant 2.57e+08 4.29e+07 4.97e+07 2.65e+07
+## 1228                     Steven Brill 2.57e+08 6.42e+07 4.27e+07 4.88e+07
+## 72                  Anthony Minghella 2.56e+08 8.52e+07 9.14e+06 8.13e+07
+## 571                      Jerry Zucker 2.55e+08 1.28e+08 1.27e+08 1.28e+08
+## 233                     Curtis Hanson 2.53e+08 5.07e+07 4.35e+07 4.68e+07
+## 392                    Frank Marshall 2.52e+08 6.31e+07 2.20e+07 6.71e+07
+## 1180                      Seth Gordon 2.52e+08 1.26e+08 1.20e+07 1.26e+08
+## 37                    Alexander Payne 2.52e+08 5.03e+07 3.18e+07 6.50e+07
+## 258                  Darren Aronofsky 2.51e+08 4.19e+07 4.89e+07 1.82e+07
+## 418                        Gavin Hood 2.51e+08 8.37e+07 8.72e+07 6.17e+07
+## 1356                 William Friedkin 2.51e+08 6.26e+07 9.56e+07 2.20e+07
+## 1176                      Sean Anders 2.50e+08 6.25e+07 6.15e+07 4.57e+07
+## 1111                   Robert Luketic 2.48e+08 6.20e+07 3.68e+07 6.80e+07
+## 1003                   Paul Verhoeven 2.47e+08 8.24e+07 3.33e+07 7.32e+07
+## 405                  Gabriele Muccino 2.46e+08 8.19e+07 7.55e+07 7.00e+07
+## 1121                      Robert Wise 2.46e+08 1.23e+08 5.72e+07 1.23e+08
+## 309                      Dean Parisot 2.45e+08 6.14e+07 4.15e+07 6.23e+07
+## 1148                     Rupert Wyatt 2.44e+08 8.13e+07 8.26e+07 3.36e+07
+## 854                        Mel Brooks 2.44e+08 8.13e+07 4.09e+07 8.63e+07
+## 617                    John Carpenter 2.43e+08 2.21e+07 1.33e+07 2.02e+07
+## 27              Alejandro G. Inarritu 2.42e+08 8.07e+07 9.01e+07 4.23e+07
+## 1118                 Robert Stromberg 2.41e+08 2.41e+08       NA 2.41e+08
+## 685                   Jonathan Mostow 2.39e+08 7.97e+07 6.15e+07 5.01e+07
+## 634                       John Landis 2.38e+08 7.95e+07 5.41e+07 5.42e+07
+## 814                      Mark Andrews 2.37e+08 2.37e+08       NA 2.37e+08
+## 1204                    Stephen Herek 2.36e+08 3.38e+07 2.60e+07 1.91e+07
+## 260               Darren Lynn Bousman 2.31e+08 5.76e+07 3.96e+07 7.17e+07
+## 816                       Mark Dindal 2.28e+08 7.61e+07 6.69e+07 8.93e+07
+## 95                        Ben Affleck 2.28e+08 1.14e+08 3.10e+07 1.14e+08
+## 720               Keenen Ivory Wayans 2.28e+08 5.70e+07 1.93e+07 6.37e+07
+## 1281                      Tobe Hooper 2.28e+08 3.80e+07 3.19e+07 3.09e+07
+## 151                   Bruce Beresford 2.23e+08 1.12e+08 7.17e+06 1.12e+08
+## 492                       Hugh Wilson 2.23e+08 5.57e+07 4.51e+07 5.38e+07
+## 330                          Don Hall 2.22e+08 2.22e+08       NA 2.22e+08
+## 1253                     Tarsem Singh 2.22e+08 5.55e+07 3.04e+07 6.31e+07
+## 1328                   Victor Fleming 2.21e+08 1.10e+08 1.25e+08 1.10e+08
+## 1344                     Wes Anderson 2.20e+08 3.14e+07 2.12e+07 2.40e+07
+## 521                   James L. Brooks 2.20e+08 7.33e+07 6.47e+07 4.20e+07
+## 390                    Frank Darabont 2.19e+08 5.46e+07 5.48e+07 2.81e+07
+## 749                     Kirk De Micco 2.17e+08 1.09e+08 1.11e+08 1.09e+08
+## 797                    Malcolm D. Lee 2.17e+08 4.34e+07 1.56e+07 3.82e+07
+## 512                       James Bobin 2.17e+08 7.22e+07 1.91e+07 7.68e+07
+## 1053                   Randal Kleiser 2.16e+08 1.08e+08 1.04e+08 1.08e+08
+## 645                      John Pasquin 2.16e+08 7.20e+07 6.43e+07 4.85e+07
+## 822                      Mark Osborne 2.15e+08 2.15e+08       NA 2.15e+08
+## 924                        Mimi Leder 2.15e+08 7.17e+07 5.96e+07 4.13e+07
+## 766                       Lee Daniels 2.12e+08 7.06e+07 3.99e+07 4.75e+07
+## 106                     Bibo Bergeron 2.12e+08 1.06e+08 7.78e+07 1.06e+08
+## 967                       Nora Ephron 2.10e+08 1.05e+08 1.53e+07 1.05e+08
+## 921                       Mike Newell 2.09e+08 4.19e+07 3.67e+07 4.20e+07
+## 433                George P. Cosmatos 2.09e+08 6.97e+07 7.50e+07 5.65e+07
+## 1264                 Thor Freudenthal 2.06e+08 6.85e+07 4.51e+06 6.86e+07
+## 743                       Kevin Smith 2.06e+08 2.06e+07 1.49e+07 2.47e+07
+## 950                   Nick Cassavetes 2.04e+08 5.10e+07 3.69e+07 6.01e+07
+## 1310                      Tony Gilroy 2.03e+08 6.76e+07 3.97e+07 4.90e+07
+## 729                      Kenny Ortega 2.02e+08 6.73e+07 2.58e+07 7.18e+07
+## 365                       Eric Brevig 2.02e+08 1.01e+08 1.08e+06 1.01e+08
+## 760                     Larry Charles 2.01e+08 6.70e+07 5.81e+07 5.96e+07
+## 937                      Nathan Greno 2.01e+08 2.01e+08       NA 2.01e+08
+## 1254                      Tate Taylor 2.00e+08 1.00e+08 9.84e+07 1.00e+08
+## 1350                       Will Gluck 2.00e+08 6.67e+07 1.67e+07 5.84e+07
+## 677                   Jonathan Frakes 1.99e+08 6.64e+07 2.77e+07 7.01e+07
+## 431                     George Miller 1.98e+08 1.98e+08       NA 1.98e+08
+## 724                        Ken Kwapis 1.97e+08 4.92e+07 3.15e+07 4.14e+07
+## 770                       Len Wiseman 1.97e+08 9.84e+07 5.11e+07 9.84e+07
+## 148                     Brian Robbins 1.97e+08 3.28e+07 2.16e+07 2.93e+07
+## 1361                      Woody Allen 1.95e+08 1.30e+07 1.06e+07 1.06e+07
+## 1055                  Randall Wallace 1.95e+08 6.49e+07 1.15e+07 5.97e+07
+## 739                        Kevin Lima 1.95e+08 9.73e+07 4.30e+07 9.73e+07
+## 359                   Elizabeth Banks 1.92e+08 9.61e+07 1.23e+08 9.61e+07
+## 792                   Luke Greenfield 1.92e+08 4.79e+07 2.85e+07 4.74e+07
+## 1255                  Taylor Hackford 1.91e+08 3.19e+07 3.06e+07 2.51e+07
+## 939                       Neil Burger 1.91e+08 4.77e+07 7.12e+07 2.00e+07
+## 469                     Harold Becker 1.90e+08 3.80e+07 1.45e+07 3.29e+07
+## 1067                       Rich Moore 1.89e+08 1.89e+08       NA 1.89e+08
+## 1164                      Sam Weisman 1.89e+08 4.72e+07 3.89e+07 3.03e+07
+## 1263                    Thomas Carter 1.88e+08 6.28e+07 3.07e+07 6.73e+07
+## 572                       Jesse Dylan 1.88e+08 6.27e+07 3.76e+07 5.26e+07
+## 1018                    Peter Chelsom 1.87e+08 6.25e+07 1.53e+07 5.79e+07
+## 1114                   Robert Redford 1.87e+08 3.75e+07 2.72e+07 3.07e+07
+## 1130                  Roger Donaldson 1.87e+08 4.67e+07 2.01e+07 4.73e+07
+## 1004               Paul W.S. Anderson 1.87e+08 6.22e+07 2.32e+07 7.04e+07
+## 1206                  Stephen Hopkins 1.86e+08 3.71e+07 1.89e+07 3.07e+07
+## 1355                 William Cottrell 1.85e+08 1.85e+08       NA 1.85e+08
+## 416                    Gary Trousdale 1.84e+08 9.21e+07 1.14e+07 9.21e+07
+## 1345                         Wes Ball 1.84e+08 9.21e+07 1.47e+07 9.21e+07
+## 1342                       Wayne Wang 1.83e+08 4.59e+07 3.30e+07 3.55e+07
+## 299                   David Silverman 1.83e+08 1.83e+08       NA 1.83e+08
+## 774                      Les Mayfield 1.83e+08 4.56e+07 4.17e+07 4.07e+07
+## 425                    George Clooney 1.82e+08 4.54e+07 2.22e+07 3.62e+07
+## 326                      Dominic Sena 1.82e+08 6.06e+07 4.64e+07 6.98e+07
+## 1291                          Tom Dey 1.79e+08 5.97e+07 2.76e+07 5.69e+07
+## 657                    John Whitesell 1.76e+08 4.39e+07 1.76e+07 3.61e+07
+## 118                        Boaz Yakin 1.75e+08 5.85e+07 5.11e+07 4.27e+07
+## 1247               Sylvester Stallone 1.73e+08 8.66e+07 2.31e+07 8.66e+07
+## 1279                Timur Bekmambetov 1.72e+08 8.60e+07 6.86e+07 8.60e+07
+## 922                      Mike Nichols 1.72e+08 4.30e+07 2.87e+07 4.95e+07
+## 417                       Gary Winick 1.71e+08 4.27e+07 2.66e+07 5.45e+07
+## 742             Kevin Rodney Sullivan 1.71e+08 5.69e+07 1.67e+07 6.50e+07
+## 901                      Mick Jackson 1.69e+08 8.47e+07 5.27e+07 8.47e+07
+## 1223                   Steve Oedekerk 1.69e+08 5.63e+07 4.73e+07 4.45e+07
+## 600                          Joe Roth 1.67e+08 8.37e+07 1.41e+07 8.37e+07
+## 861                     Michael Apted 1.67e+08 4.17e+07 4.40e+07 2.82e+07
+## 1163               Sam Taylor-Johnson 1.66e+08 1.66e+08       NA 1.66e+08
+## 208             Christopher McQuarrie 1.66e+08 5.54e+07 4.27e+07 8.00e+07
+## 565               Jennifer Yuh Nelson 1.65e+08 1.65e+08       NA 1.65e+08
+## 660                         Jon Amiel 1.65e+08 4.12e+07 3.21e+07 3.16e+07
+## 293                    David R. Ellis 1.64e+08 4.09e+07 2.04e+07 3.92e+07
+## 923                      Milos Forman 1.64e+08 8.18e+07 4.27e+07 8.18e+07
+## 1002                     Paul Tibbitt 1.62e+08 1.62e+08       NA 1.62e+08
+## 762                   Lasse Hallstrom 1.62e+08 2.70e+07 2.83e+07 1.03e+07
+## 1077                Richard Linklater 1.60e+08 1.60e+07 2.38e+07 8.05e+06
+## 629                      John Hamburg 1.59e+08 5.31e+07 4.67e+07 7.13e+07
+## 507                       Jake Kasdan 1.59e+08 3.98e+07 4.30e+07 2.84e+07
+## 453                      Greg Mottola 1.59e+08 7.94e+07 5.95e+07 7.94e+07
+## 479                       Henry Joost 1.58e+08 7.89e+07 3.54e+07 7.89e+07
+## 750                        Kirk Jones 1.57e+08 3.92e+07 2.16e+07 4.41e+07
+## 129                   Brad Silberling 1.57e+08 5.22e+07 4.68e+07 4.94e+07
+## 1146                   Rupert Sanders 1.55e+08 1.55e+08       NA 1.55e+08
+## 302                       David Twohy 1.54e+08 3.86e+07 1.74e+07 4.06e+07
+## 25                      Albert Hughes 1.54e+08 5.14e+07 3.76e+07 3.16e+07
+## 948                    Nicholas Meyer 1.54e+08 7.69e+07 2.84e+06 7.69e+07
+## 438                George Tillman Jr. 1.53e+08 3.82e+07 1.10e+07 4.05e+07
+## 215                     Clark Johnson 1.53e+08 7.65e+07 5.68e+07 7.65e+07
+## 409                       Gary Fleder 1.52e+08 2.53e+07 2.60e+07 1.47e+07
+## 501                       J.B. Rogers 1.51e+08 7.53e+07 9.87e+07 7.53e+07
+## 885                     Michael Moore 1.50e+08 5.01e+07 6.04e+07 2.45e+07
+## 1249                  Takashi Shimizu 1.49e+08 7.47e+07 5.02e+07 7.47e+07
+## 1297                       Tom Hooper 1.49e+08 1.49e+08       NA 1.49e+08
+## 1299                      Tom McGrath 1.48e+08 1.48e+08       NA 1.48e+08
+## 96                        Ben Falcone 1.48e+08 7.38e+07 1.52e+07 7.38e+07
+## 643                        John Moore 1.47e+08 4.91e+07 2.47e+07 5.91e+07
+## 879                   Michael Lembeck 1.47e+08 7.36e+07 9.28e+07 7.36e+07
+## 849                    Matthew Vaughn 1.46e+08 1.46e+08       NA 1.46e+08
+## 697                       Josh Gordon 1.46e+08 7.30e+07 6.39e+07 7.30e+07
+## 142                   Brian Helgeland 1.45e+08 4.84e+07 3.75e+07 5.61e+07
+## 272                      David Dobkin 1.45e+08 4.82e+07 1.18e+07 4.71e+07
+## 899                     Michel Gondry 1.45e+08 4.82e+07 4.52e+07 3.41e+07
+## 1041                   Phyllida Lloyd 1.44e+08 1.44e+08       NA 1.44e+08
+## 17                     Alan J. Pakula 1.44e+08 7.18e+07 4.09e+07 7.18e+07
+## 29                 Alessandro Carloni 1.44e+08 1.44e+08       NA 1.44e+08
+## 58                 Andrzej Bartkowiak 1.42e+08 4.74e+07 1.13e+07 5.18e+07
+## 1169                      Scott Hicks 1.42e+08 3.55e+07 2.04e+07 3.36e+07
+## 914                      Mike Gabriel 1.42e+08 1.42e+08       NA 1.42e+08
+## 684                     Jonathan Lynn 1.41e+08 4.69e+07 1.44e+07 5.29e+07
+## 249                     Daniel Myrick 1.41e+08 1.41e+08       NA 1.41e+08
+## 178              Charles Martin Smith 1.39e+08 4.63e+07 2.41e+07 4.20e+07
+## 444                     Glenn Ficarra 1.38e+08 6.90e+07 2.15e+07 6.90e+07
+## 368                     Eric Leighton 1.38e+08 1.38e+08       NA 1.38e+08
+## 296                    David S. Goyer 1.38e+08 4.59e+07 5.63e+06 4.26e+07
+## 1210               Stephen Norrington 1.36e+08 6.82e+07 2.50e+06 6.82e+07
+## 516                    James DeMonaco 1.36e+08 6.80e+07 5.02e+06 6.80e+07
+## 1336                      Walt Becker 1.35e+08 6.77e+07 2.57e+07 6.77e+07
+## 385  Florian Henckel von Donnersmarck 1.35e+08 6.76e+07 0.00e+00 6.76e+07
+## 829               Mark Steven Johnson 1.34e+08 6.70e+07 6.90e+07 6.70e+07
+## 638                       John Madden 1.31e+08 6.57e+07 4.89e+07 6.57e+07
+## 1001             Paul Thomas Anderson 1.31e+08 2.19e+07 1.09e+07 2.01e+07
+## 1339                    Warren Beatty 1.30e+08 6.51e+07 5.46e+07 6.51e+07
+## 1091                       Rob Bowman 1.30e+08 4.33e+07 4.05e+07 4.31e+07
+## 486                      Howard Zieff 1.30e+08 6.48e+07 7.04e+06 6.48e+07
+## 328                         Don Bluth 1.29e+08 4.30e+07 1.83e+07 4.81e+07
+## 537                   Jason Friedberg 1.29e+08 3.22e+07 1.21e+07 3.74e+07
+## 546                       Jay Russell 1.28e+08 4.26e+07 2.87e+07 3.41e+07
+## 940                       Neil Jordan 1.28e+08 4.26e+07 5.43e+07 1.19e+07
+## 287                     David McNally 1.28e+08 6.38e+07 4.21e+06 6.38e+07
+## 1019                   Peter Farrelly 1.27e+08 1.27e+08       NA 1.27e+08
+## 855                        Mel Gibson 1.27e+08 4.23e+07 3.83e+07 5.09e+07
+## 978                        P.J. Hogan 1.27e+08 1.27e+08       NA 1.27e+08
+## 1218                    Steve Hickner 1.27e+08 1.27e+08       NA 1.27e+08
+## 248                   Daniel Espinosa 1.26e+08 1.26e+08       NA 1.26e+08
+## 1152                     Ryan Coogler 1.26e+08 6.29e+07 6.62e+07 6.29e+07
+## 1022                     Peter Hewitt 1.25e+08 4.17e+07 3.20e+07 3.80e+07
+## 894                     Michael Sucsy 1.25e+08 1.25e+08       NA 1.25e+08
+## 696                        Josh Boone 1.25e+08 1.25e+08       NA 1.25e+08
+## 942                    Neill Blomkamp 1.25e+08 6.23e+07 4.35e+07 6.23e+07
+## 523                    James McTeigue 1.25e+08 4.15e+07 2.74e+07 3.81e+07
+## 304                       David Yates 1.24e+08 1.24e+08       NA 1.24e+08
+## 542                 Jay Chandrasekhar 1.23e+08 3.07e+07 3.37e+07 1.88e+07
+## 804                     Marc Lawrence 1.23e+08 6.14e+07 4.51e+07 6.14e+07
+## 1007                Penelope Spheeris 1.22e+08 1.22e+08       NA 1.22e+08
+## 1144                  Ruben Fleischer 1.22e+08 6.08e+07 2.09e+07 6.08e+07
+## 699                        Josh Trank 1.21e+08 6.03e+07 5.98e+06 6.03e+07
+## 1309                    Tony Bancroft 1.21e+08 1.21e+08       NA 1.21e+08
+## 649                  John R. Leonetti 1.20e+08 6.01e+07 3.42e+07 6.01e+07
+## 218                      Cody Cameron 1.20e+08 1.20e+08       NA 1.20e+08
+## 487                      Hoyt Yeatman 1.19e+08 1.19e+08       NA 1.19e+08
+## 1034              Phil Alden Robinson 1.18e+08 1.18e+08       NA 1.18e+08
+## 688                      Jose Padilha 1.17e+08 5.86e+07 0.00e+00 5.86e+07
+## 279                David Gordon Green 1.17e+08 1.95e+07 3.42e+07 3.77e+06
+## 65                Angelina Jolie Pitt 1.16e+08 3.88e+07 6.65e+07 5.31e+05
+## 88                   Barbra Streisand 1.16e+08 5.80e+07 2.37e+07 5.80e+07
+## 821                    Mark Neveldine 1.15e+08 2.31e+07 1.87e+07 2.05e+07
+## 160                      Byron Howard 1.14e+08 1.14e+08       NA 1.14e+08
+## 622                 John Erick Dowdle 1.14e+08 2.84e+07 5.50e+06 2.95e+07
+## 1166                     Scott Cooper 1.13e+08 3.78e+07 2.57e+07 3.95e+07
+## 1203                   Stephen Gaghan 1.12e+08 3.74e+07 2.31e+07 5.08e+07
+## 1354               William Brent Bell 1.12e+08 3.74e+07 1.51e+07 3.58e+07
+## 1238                     Stuart Baird 1.12e+08 5.59e+07 1.81e+07 5.59e+07
+## 284                        David Lean 1.12e+08 1.12e+08       NA 1.12e+08
+## 718                   Kathryn Bigelow 1.11e+08 5.57e+07 5.66e+07 5.57e+07
+## 1224                       Steve Pink 1.11e+08 3.70e+07 2.15e+07 4.86e+07
+## 159                       Burr Steers 1.11e+08 2.77e+07 2.68e+07 2.10e+07
+## 764                 Lawrence Guterman 1.10e+08 5.52e+07 5.40e+07 5.52e+07
+## 602                        Joe Wright 1.10e+08 3.67e+07 3.05e+06 3.50e+07
+## 584                      Jim Sheridan 1.09e+08 2.73e+07 4.19e+06 2.85e+07
+## 1015                Peter Billingsley 1.09e+08 1.09e+08       NA 1.09e+08
+## 610                     John A. Davis 1.09e+08 5.45e+07 3.73e+07 5.45e+07
+## 863               Michael Caton-Jones 1.09e+08 3.63e+07 1.67e+07 3.16e+07
+## 1076                   Richard Lester 1.08e+08 1.08e+08       NA 1.08e+08
+## 661                         Jon Avnet 1.08e+08 3.60e+07 1.74e+07 4.01e+07
+## 976                         Oren Peli 1.08e+08 1.08e+08       NA 1.08e+08
+## 313                  Denis Villeneuve 1.08e+08 5.39e+07 9.96e+06 5.39e+07
+## 393                      Frank Miller 1.08e+08 3.59e+07 3.32e+07 1.98e+07
+## 1201                   Stephen Daldry 1.08e+08 3.59e+07 5.10e+06 3.42e+07
+## 377                     Evan Goldberg 1.08e+08 5.38e+07 6.74e+07 5.38e+07
+## 216                       Clay Kaytis 1.07e+08 1.07e+08       NA 1.07e+08
+## 528                        James Wong 1.07e+08 3.55e+07 2.31e+07 4.39e+07
+## 965                        Noam Murro 1.06e+08 1.06e+08       NA 1.06e+08
+## 165                     Carl Franklin 1.06e+08 3.52e+07 1.04e+07 4.09e+07
+## 493                      Iain Softley 1.06e+08 3.52e+07 2.39e+07 4.78e+07
+## 969                    Norman Jewison 1.05e+08 3.50e+07 2.65e+07 5.00e+07
+## 94                       Baz Luhrmann 1.04e+08 5.19e+07 7.81e+06 5.19e+07
+## 682                   Jonathan Levine 1.03e+08 3.45e+07 3.21e+07 3.50e+07
+## 1029                     Peter Ramsey 1.03e+08 1.03e+08       NA 1.03e+08
+## 551                    Jeannot Szwarc 1.03e+08 1.03e+08       NA 1.03e+08
+## 283                       David Koepp 1.02e+08 2.56e+07 1.52e+07 2.07e+07
+## 1117                 Robert Stevenson 1.02e+08 1.02e+08       NA 1.02e+08
+## 498                     Irwin Winkler 1.02e+08 2.55e+07 1.73e+07 1.89e+07
+## 268                      David Bowers 1.02e+08 5.08e+07 2.61e+06 5.08e+07
+## 342                      Duncan Jones 1.02e+08 5.08e+07 5.46e+06 5.08e+07
+## 1140                      Ron Shelton 1.01e+08 2.53e+07 2.15e+07 1.95e+07
+## 134                    Brenda Chapman 1.01e+08 1.01e+08       NA 1.01e+08
+## 54                      Andrew Niccol 1.01e+08 2.52e+07 1.03e+07 2.54e+07
+## 495                     Igor Kovalyov 1.00e+08 1.00e+08       NA 1.00e+08
+## 117                          Bo Welch 1.00e+08 1.00e+08       NA 1.00e+08
+## 767                      Lee Tamahori 1.00e+08 5.01e+07 3.39e+07 5.01e+07
+## 1132                    Roger Michell 9.78e+07 4.89e+07 2.53e+07 4.89e+07
+## 38                      Alexandre Aja 9.75e+07 3.25e+07 8.53e+06 3.07e+07
+## 282                     David Kellogg 9.74e+07 9.74e+07       NA 9.74e+07
+## 903                     Miguel Arteta 9.73e+07 2.43e+07 2.91e+07 1.46e+07
+## 177           Charles Herman-Wurmfeld 9.68e+07 4.84e+07 5.85e+07 4.84e+07
+## 1222                      Steve Miner 9.68e+07 1.94e+07 1.50e+07 1.91e+07
+## 419                    Gavin O&#39;Connor 9.65e+07 1.93e+07 2.61e+07 1.37e+07
+## 765                   Lawrence Kasdan 9.65e+07 2.41e+07 1.36e+07 2.91e+07
+## 887              Michael Patrick King 9.53e+07 9.53e+07       NA 9.53e+07
+## 985                   Patrick Lussier 9.52e+07 3.17e+07 2.04e+07 3.30e+07
+## 665                       Jon Hurwitz 9.48e+07 4.74e+07 1.32e+07 4.74e+07
+## 652                      John Schultz 9.45e+07 3.15e+07 1.77e+07 2.52e+07
+## 746                   Kimberly Peirce 9.30e+07 2.32e+07 1.39e+07 2.34e+07
+## 454                    Gregory Hoblit 9.27e+07 3.09e+07 1.31e+07 2.87e+07
+## 1305                      Tom Vaughan 9.21e+07 4.61e+07 4.84e+07 4.61e+07
+## 637                   John Luessenhop 9.21e+07 4.60e+07 1.66e+07 4.60e+07
+## 599                         Joe Pytka 9.04e+07 9.04e+07       NA 9.04e+07
+## 1258                    Terry Gilliam 9.04e+07 3.01e+07 1.71e+07 3.79e+07
+## 373                        Etan Cohen 9.04e+07 9.04e+07       NA 9.04e+07
+## 163                     Callie Khouri 9.03e+07 4.51e+07 3.46e+07 4.51e+07
+## 1083                    Rick Famuyiwa 9.01e+07 2.25e+07 4.49e+06 2.26e+07
+## 1229                     Steven Quale 9.01e+07 4.51e+07 3.52e+06 4.51e+07
+## 642                       John Milius 8.97e+07 2.99e+07 1.33e+07 3.76e+07
+## 706               Julie Anne Robinson 8.93e+07 4.47e+07 2.58e+07 4.47e+07
+## 548               Jean-Jacques Annaud 8.93e+07 4.46e+07 9.54e+06 4.46e+07
+## 1110                    Robert Iscove 8.89e+07 2.96e+07 3.02e+07 2.06e+07
+## 1142                         Ronny Yu 8.86e+07 4.43e+07 5.35e+07 4.43e+07
+## 891                   Michael Ritchie 8.79e+07 4.40e+07 5.07e+07 4.40e+07
+## 604                     Joel Edgerton 8.75e+07 4.38e+07 0.00e+00 4.38e+07
+## 1154                      Ryan Murphy 8.73e+07 4.37e+07 5.22e+07 4.37e+07
+## 1075              Richard LaGravenese 8.60e+07 2.87e+07 2.19e+07 1.94e+07
+## 1064                  Ric Roman Waugh 8.58e+07 4.29e+07 0.00e+00 4.29e+07
+## 1205               Stephen Hillenburg 8.54e+07 8.54e+07       NA 8.54e+07
+## 1316                      Trey Parker 8.54e+07 2.85e+07 2.60e+07 3.28e+07
+## 1246                    Sylvain White 8.49e+07 4.24e+07 2.67e+07 4.24e+07
+## 1282                     Tod Williams 8.47e+07 8.47e+07       NA 8.47e+07
+## 915                        Mike Judge 8.47e+07 2.82e+07 3.02e+07 1.08e+07
+## 968                   Norman Ferguson 8.43e+07 8.43e+07       NA 8.43e+07
+## 1061                  Reginald Hudlin 8.37e+07 4.18e+07 4.00e+07 4.18e+07
+## 578                      Jim Abrahams 8.34e+07 8.34e+07       NA 8.34e+07
+## 301                       David Soren 8.30e+07 8.30e+07       NA 8.30e+07
+## 19                        Alan Parker 8.26e+07 2.75e+07 1.97e+07 1.96e+07
+## 404                       Gabor Csupo 8.22e+07 8.22e+07       NA 8.22e+07
+## 440                         Gil Kenan 8.15e+07 4.08e+07 4.65e+07 4.08e+07
+## 541                Jaume Collet-Serra 8.07e+07 4.03e+07 1.97e+07 4.03e+07
+## 481                      Henry Selick 8.07e+07 4.03e+07 4.94e+07 4.03e+07
+## 1131                     Roger Kumble 8.02e+07 2.67e+07 1.05e+07 2.44e+07
+## 485                     Howard Deutch 8.02e+07 2.67e+07 1.57e+07 1.92e+07
+## 482                      Herbert Ross 8.00e+07 8.00e+07       NA 8.00e+07
+## 647                       John Polson 7.97e+07 3.98e+07 1.59e+07 3.98e+07
+## 611                       John Badham 7.96e+07 7.96e+07       NA 7.96e+07
+## 87                   Barbet Schroeder 7.87e+07 2.62e+07 9.78e+06 3.19e+07
+## 889                  Michael Pressman 7.87e+07 7.87e+07       NA 7.87e+07
+## 466                      Harald Zwart 7.85e+07 3.92e+07 1.14e+07 3.92e+07
+## 181                 Charles Stone III 7.82e+07 3.91e+07 2.45e+07 3.91e+07
+## 32                      Alex Kendrick 7.81e+07 2.60e+07 1.38e+07 3.35e+07
+## 1189                      Simon Wells 7.81e+07 3.90e+07 2.50e+07 3.90e+07
+## 127                       Brad Furman 7.73e+07 3.86e+07 2.73e+07 3.86e+07
+## 314                     Dennie Gordon 7.71e+07 2.57e+07 1.11e+07 2.71e+07
+## 790                      Luis Mandoki 7.68e+07 3.84e+07 2.03e+07 3.84e+07
+## 270                      David Carson 7.57e+07 7.57e+07       NA 7.57e+07
+## 102                    Bennett Miller 7.56e+07 7.56e+07       NA 7.56e+07
+## 654                    John Stockwell 7.55e+07 2.52e+07 1.30e+07 1.85e+07
+## 190                        Chris Koch 7.54e+07 3.77e+07 3.15e+07 3.77e+07
+## 1198                 Stefen Fangmeier 7.50e+07 7.50e+07       NA 7.50e+07
+## 707                      Julie Taymor 7.47e+07 1.87e+07 1.23e+07 2.43e+07
+## 722                      Kelly Asbury 7.32e+07 7.32e+07       NA 7.32e+07
+## 1012                      Pete Travis 7.23e+07 7.23e+07       NA 7.23e+07
+## 581                     Jim Gillespie 7.22e+07 7.22e+07       NA 7.22e+07
+## 46                     Amy Heckerling 7.21e+07 2.40e+07 2.93e+07 1.55e+07
+## 356                          Eli Roth 7.20e+07 2.40e+07 2.08e+07 1.75e+07
+## 426                      George Cukor 7.20e+07 7.20e+07       NA 7.20e+07
+## 896                    Michael Tollin 7.20e+07 3.60e+07 2.30e+07 3.60e+07
+## 1214                       Steve Beck 7.19e+07 3.60e+07 8.34e+06 3.60e+07
+## 245                  Dan Trachtenberg 7.19e+07 7.19e+07       NA 7.19e+07
+## 1141                    Ron Underwood 7.17e+07 2.39e+07 2.39e+07 1.67e+07
+## 439                        Gil Junger 7.16e+07 3.58e+07 3.36e+06 3.58e+07
+## 733                        Kevin Bray 7.13e+07 3.57e+07 1.44e+07 3.57e+07
+## 1194                      Spike Jonze 7.07e+07 2.36e+07 1.76e+06 2.29e+07
+## 917                        Mike McCoy 7.00e+07 7.00e+07       NA 7.00e+07
+## 1063                     Rian Johnson 7.00e+07 3.50e+07 4.45e+07 3.50e+07
+## 219                     Colin Higgins 6.97e+07 6.97e+07       NA 6.97e+07
+## 1173                    Scott Stewart 6.93e+07 3.47e+07 7.80e+06 3.47e+07
+## 905                   Mikael Hafstrom 6.91e+07 3.45e+07 2.11e+06 3.45e+07
+## 15                     Akiva Schaffer 6.87e+07 3.44e+07 0.00e+00 3.44e+07
+## 651                  John Schlesinger 6.81e+07 3.41e+07 2.70e+07 3.41e+07
+## 961                      Nimrod Antal 6.80e+07 3.40e+07 2.55e+07 3.40e+07
+## 826                       Mark Rosman 6.77e+07 3.38e+07 2.49e+07 3.38e+07
+## 1192                    Sofia Coppola 6.72e+07 1.68e+07 1.95e+07 1.04e+07
+## 1188                     Sidney Lumet 6.70e+07 3.35e+07 2.90e+07 3.35e+07
+## 1024                      Peter Hyams 6.69e+07 6.69e+07       NA 6.69e+07
+## 575                     Jessie Nelson 6.66e+07 3.33e+07 9.89e+06 3.33e+07
+## 133                      Breck Eisner 6.65e+07 3.32e+07 8.31e+06 3.32e+07
+## 586                     Jimmy Hayward 6.63e+07 3.31e+07 3.20e+07 3.31e+07
+## 1259                    Terry Zwigoff 6.63e+07 3.31e+07 3.81e+07 3.31e+07
+## 64                    Angela Robinson 6.61e+07 3.30e+07 4.66e+07 3.30e+07
+## 455                    Gregory Jacobs 6.60e+07 6.60e+07       NA 6.60e+07
+## 789                        Luis Llosa 6.56e+07 6.56e+07       NA 6.56e+07
+## 316                    Dennis Iliadis 6.54e+07 3.27e+07 0.00e+00 3.27e+07
+## 442             Gina Prince-Bythewood 6.52e+07 3.26e+07 7.30e+06 3.26e+07
+## 549                  Jean-Marc Vallee 6.52e+07 3.26e+07 7.48e+06 3.26e+07
+## 538                       Jason Moore 6.50e+07 6.50e+07       NA 6.50e+07
+## 254                      Danny Leiner 6.50e+07 3.25e+07 2.02e+07 3.25e+07
+## 52                     Andrew Douglas 6.43e+07 6.43e+07       NA 6.43e+07
+## 1101                       Rob Zombie 6.40e+07 1.60e+07 1.34e+07 1.47e+07
+## 562                       Jeff Wadlow 6.36e+07 2.12e+07 9.87e+06 2.48e+07
+## 57               Andrey Konchalovskiy 6.34e+07 6.34e+07       NA 6.34e+07
+## 220                     Colin Strause 6.32e+07 3.16e+07 1.44e+07 3.16e+07
+## 194                        Chris Rock 6.31e+07 3.15e+07 8.85e+06 3.15e+07
+## 959                         Niki Caro 6.28e+07 3.14e+07 1.85e+07 3.14e+07
+## 838                      Mary Lambert 6.27e+07 3.13e+07 3.69e+07 3.13e+07
+## 432                      George Nolfi 6.25e+07 6.25e+07       NA 6.25e+07
+## 1257                  Terrence Malick 6.24e+07 2.08e+07 1.35e+07 1.33e+07
+## 799                      Mans Marlind 6.23e+07 6.23e+07       NA 6.23e+07
+## 593                      Joe Carnahan 6.20e+07 3.10e+07 2.90e+07 3.10e+07
+## 981                   Patricia Riggen 6.17e+07 6.17e+07       NA 6.17e+07
+## 1157                       Salim Akil 6.17e+07 3.08e+07 9.12e+06 3.08e+07
+## 1295                        Tom Hanks 6.14e+07 3.07e+07 6.90e+06 3.07e+07
+## 1208                      Stephen Kay 6.13e+07 2.04e+07 2.37e+07 1.50e+07
+## 229                   Craig Gillespie 6.07e+07 2.02e+07 1.53e+07 1.83e+07
+## 511                       James Algar 6.05e+07 6.05e+07       NA 6.05e+07
+## 883                 Michael McCullers 6.03e+07 6.03e+07       NA 6.03e+07
+## 386                   Forest Whitaker 6.00e+07 6.00e+07       NA 6.00e+07
+## 908                       Mike Binder 6.00e+07 2.00e+07 1.43e+06 1.97e+07
+## 675                   Jonathan Dayton 5.99e+07 5.99e+07       NA 5.99e+07
+## 210               Christopher Spencer 5.97e+07 5.97e+07       NA 5.97e+07
+## 823                   Mark Pellington 5.96e+07 2.98e+07 7.68e+06 2.98e+07
+## 840                 Mathieu Kassovitz 5.96e+07 5.96e+07       NA 5.96e+07
+## 589                      Jodie Foster 5.95e+07 1.98e+07 2.01e+07 1.75e+07
+## 624                John Francis Daley 5.89e+07 5.89e+07       NA 5.89e+07
+## 83                        Ash Brannon 5.89e+07 5.89e+07       NA 5.89e+07
+## 530                      Jamie Blanks 5.84e+07 2.92e+07 1.25e+07 2.92e+07
+## 847               Matthew O&#39;Callaghan 5.83e+07 5.83e+07       NA 5.83e+07
+## 251                       Danny Boyle 5.81e+07 2.91e+07 1.52e+07 2.91e+07
+## 371                      Ericson Core 5.75e+07 2.88e+07 0.00e+00 2.88e+07
+## 619                         John Dahl 5.75e+07 1.44e+07 9.85e+06 1.61e+07
+## 895                    Michael Tiddes 5.74e+07 2.87e+07 1.61e+07 2.87e+07
+## 162                       Cal Brunker 5.70e+07 5.70e+07       NA 5.70e+07
+## 280                       David Hackl 5.67e+07 5.67e+07       NA 5.67e+07
+## 1235                  Steven Zaillian 5.67e+07 5.67e+07       NA 5.67e+07
+## 1221                    Steve McQueen 5.67e+07 5.67e+07       NA 5.67e+07
+## 275                 David F. Sandberg 5.65e+07 5.65e+07       NA 5.65e+07
+## 1046           Preston A. Whitmore II 5.61e+07 2.81e+07 2.98e+07 2.81e+07
+## 185                      Chris Butler 5.60e+07 5.60e+07       NA 5.60e+07
+## 415                        Gary Shore 5.59e+07 5.59e+07       NA 5.59e+07
+## 125                     Brad Anderson 5.56e+07 1.85e+07 2.89e+07 3.39e+06
+## 1332                     Vincent Ward 5.54e+07 5.54e+07       NA 5.54e+07
+## 53                     Andrew Fleming 5.53e+07 1.84e+07 1.18e+07 2.49e+07
+## 1358                  William Shatner 5.52e+07 5.52e+07       NA 5.52e+07
+## 878                   Michael Lehmann 5.52e+07 2.76e+07 1.47e+07 2.76e+07
+## 813                   Mark A.Z. Dippe 5.50e+07 5.50e+07       NA 5.50e+07
+## 402                         Fred Wolf 5.48e+07 2.74e+07 2.95e+07 2.74e+07
+## 960                   Nima Nourizadeh 5.47e+07 5.47e+07       NA 5.47e+07
+## 1252                      Tamra Davis 5.45e+07 2.72e+07 1.41e+07 2.72e+07
+## 1177                    Sean McNamara 5.43e+07 2.71e+07 2.36e+07 2.71e+07
+## 379                      Fede Alvarez 5.42e+07 5.42e+07       NA 5.42e+07
+## 791                       Luis Valdez 5.42e+07 5.42e+07       NA 5.42e+07
+## 1021                     Peter Hedges 5.42e+07 2.71e+07 3.50e+07 2.71e+07
+## 1028                  Peter MacDonald 5.37e+07 5.37e+07       NA 5.37e+07
+## 1256                        Ted Demme 5.29e+07 5.29e+07       NA 5.29e+07
+## 1160                       Sam Miller 5.25e+07 5.25e+07       NA 5.25e+07
+## 603                         Joel Coen 5.25e+07 2.63e+07 1.25e+07 2.63e+07
+## 26                  Alejandro Agresti 5.23e+07 5.23e+07       NA 5.23e+07
+## 441                 Gillian Armstrong 5.15e+07 2.58e+07 3.43e+07 2.58e+07
+## 656                        John Wells 5.14e+07 2.57e+07 1.70e+07 2.57e+07
+## 317                 Denzel Washington 5.13e+07 2.57e+07 6.47e+06 2.57e+07
+## 223                      Cory Edwards 5.11e+07 5.11e+07       NA 5.11e+07
+## 625                John Frankenheimer 5.10e+07 2.55e+07 3.04e+06 2.55e+07
+## 407                    Garth Jennings 5.10e+07 5.10e+07       NA 5.10e+07
+## 1237                     Stiles White 5.08e+07 5.08e+07       NA 5.08e+07
+## 448                    Graham Annable 5.08e+07 5.08e+07       NA 5.08e+07
+## 1068             Richard Attenborough 5.08e+07 5.08e+07       NA 5.08e+07
+## 1298                     Tom McCarthy 5.07e+07 2.54e+07 2.78e+07 2.54e+07
+## 1048                      R.J. Cutler 5.05e+07 5.05e+07       NA 5.05e+07
+## 259                      Darren Grant 5.04e+07 5.04e+07       NA 5.04e+07
+## 736                     Kevin Donovan 5.02e+07 5.02e+07       NA 5.02e+07
+## 686                Jorge R. Gutierrez 5.02e+07 5.02e+07       NA 5.02e+07
+## 1147                Rupert Wainwright 5.00e+07 5.00e+07       NA 5.00e+07
+## 1349                        Will Finn 5.00e+07 5.00e+07       NA 5.00e+07
+## 422                      Geoff Murphy 5.00e+07 5.00e+07       NA 5.00e+07
+## 70                  Anthony Hemingway 4.99e+07 4.99e+07       NA 4.99e+07
+## 297                     David S. Ward 4.98e+07 4.98e+07       NA 4.98e+07
+## 1124                        Rod Lurie 4.95e+07 1.24e+07 7.13e+06 1.41e+07
+## 344                  Dwight H. Little 4.93e+07 2.46e+07 9.73e+06 2.46e+07
+## 971                      Ole Bornedal 4.91e+07 4.91e+07       NA 4.91e+07
+## 1078                Richard Loncraine 4.87e+07 4.87e+07       NA 4.87e+07
+## 271                  David Cronenberg 4.86e+07 2.43e+07 1.02e+07 2.43e+07
+## 2                       Aaron Seltzer 4.85e+07 4.85e+07       NA 4.85e+07
+## 1123                       Robin Budd 4.84e+07 4.84e+07       NA 4.84e+07
+## 1296                      Tom Holland 4.84e+07 2.42e+07 1.28e+07 2.42e+07
+## 564                 Jennifer Flackett 4.80e+07 4.80e+07       NA 4.80e+07
+## 174             Cedric Nicolas-Troyan 4.80e+07 4.80e+07       NA 4.80e+07
+## 1227                  Steve Trenbirth 4.79e+07 4.79e+07       NA 4.79e+07
+## 857                       Mennan Yapo 4.79e+07 4.79e+07       NA 4.79e+07
+## 550                Jean-Pierre Jeunet 4.77e+07 4.77e+07       NA 4.77e+07
+## 111                    Bille Woodruff 4.76e+07 2.38e+07 9.08e+06 2.38e+07
+## 199                  Christian Ditter 4.68e+07 4.68e+07       NA 4.68e+07
+## 459                     Griffin Dunne 4.66e+07 4.66e+07       NA 4.66e+07
+## 1196                   Stanley Kramer 4.63e+07 4.63e+07       NA 4.63e+07
+## 946                   Nicholas Hytner 4.63e+07 2.31e+07 8.44e+06 2.31e+07
+## 1005                     Paul Weiland 4.60e+07 4.60e+07       NA 4.60e+07
+## 988                Patrick Tatopoulos 4.58e+07 4.58e+07       NA 4.58e+07
+## 203                  Christopher Cain 4.58e+07 2.29e+07 3.09e+07 2.29e+07
+## 213                      Clare Kilner 4.57e+07 2.28e+07 1.24e+07 2.28e+07
+## 709                   Jun Falkenstein 4.55e+07 4.55e+07       NA 4.55e+07
+## 141                      Brian Gibson 4.48e+07 4.48e+07       NA 4.48e+07
+## 358         Elizabeth Allen Rosenbaum 4.48e+07 2.24e+07 5.35e+06 2.24e+07
+## 155                   Bruce McCulloch 4.46e+07 2.23e+07 1.18e+07 2.23e+07
+## 534                        Jared Hess 4.45e+07 4.45e+07       NA 4.45e+07
+## 892                     Michael Rymer 4.43e+07 2.22e+07 1.15e+07 2.22e+07
+## 252                      Danny Cannon 4.43e+07 2.21e+07 2.52e+07 2.21e+07
+## 1260                   Theodore Melfi 4.41e+07 4.41e+07       NA 4.41e+07
+## 408               Gary David Goldberg 4.39e+07 4.39e+07       NA 4.39e+07
+## 943                  Nelson McCormick 4.38e+07 4.38e+07       NA 4.38e+07
+## 568                    Jerome Robbins 4.36e+07 4.36e+07       NA 4.36e+07
+## 85                       Audrey Wells 4.36e+07 4.36e+07       NA 4.36e+07
+## 1174                      Scott Waugh 4.36e+07 4.36e+07       NA 4.36e+07
+## 579                          Jim Fall 4.27e+07 4.27e+07       NA 4.27e+07
+## 1239                   Stuart Gillard 4.27e+07 4.27e+07       NA 4.27e+07
+## 871                 Michael Dougherty 4.26e+07 4.26e+07       NA 4.26e+07
+## 768                Lee Toland Krieger 4.25e+07 4.25e+07       NA 4.25e+07
+## 714                      Karyn Kusama 4.21e+07 2.10e+07 6.83e+06 2.10e+07
+## 340                      Drew Goddard 4.20e+07 4.20e+07       NA 4.20e+07
+## 1274                    Tim McCanlies 4.14e+07 4.14e+07       NA 4.14e+07
+## 1283                       Todd Field 4.14e+07 2.07e+07 2.15e+07 2.07e+07
+## 725                         Ken Scott 4.09e+07 2.04e+07 1.45e+07 2.04e+07
+## 1357                   William Malone 4.08e+07 4.08e+07       NA 4.08e+07
+## 876                   Michael Hoffman 4.08e+07 2.04e+07 8.98e+06 2.04e+07
+## 930                   Morgan Spurlock 4.04e+07 2.02e+07 1.23e+07 2.02e+07
+## 1009              Perry Andelin Blake 4.04e+07 4.04e+07       NA 4.04e+07
+## 288                      David Mirkin 4.03e+07 4.03e+07       NA 4.03e+07
+## 1202                   Stephen Frears 4.03e+07 2.02e+07 2.06e+07 2.02e+07
+## 1044                            Pitof 4.02e+07 4.02e+07       NA 4.02e+07
+## 195                      Chris Stokes 4.01e+07 4.01e+07       NA 4.01e+07
+## 112                Billy Bob Thornton 4.00e+07 2.00e+07 6.33e+06 2.00e+07
+## 172                   Cathy Malkasian 3.99e+07 3.99e+07       NA 3.99e+07
+## 592                          Joe Camp 3.96e+07 3.96e+07       NA 3.96e+07
+## 1213                      Steve Antin 3.94e+07 3.94e+07       NA 3.94e+07
+## 621                          John Eng 3.94e+07 3.94e+07       NA 3.94e+07
+## 984                    Patrick Hughes 3.93e+07 3.93e+07       NA 3.93e+07
+## 941                       Neil LaBute 3.93e+07 3.93e+07       NA 3.93e+07
+## 1049                   Rachel Talalay 3.89e+07 1.95e+07 2.18e+07 1.95e+07
+## 264                        Dave Green 3.89e+07 3.89e+07       NA 3.89e+07
+## 1231                    Steven Seagal 3.86e+07 3.86e+07       NA 3.86e+07
+## 1035                      Phil Joanou 3.84e+07 3.84e+07       NA 3.84e+07
+## 166                       Carl Rinsch 3.83e+07 3.83e+07       NA 3.83e+07
+## 920                     Mike Nawrocki 3.83e+07 1.91e+07 9.10e+06 1.91e+07
+## 999               Paul Michael Glaser 3.81e+07 3.81e+07       NA 3.81e+07
+## 517                       James Foley 3.81e+07 1.27e+07 2.26e+06 1.22e+07
+## 1178                        Sean Penn 3.81e+07 1.90e+07 9.67e+05 1.90e+07
+## 605                       Joel Gallen 3.79e+07 3.79e+07       NA 3.79e+07
+## 731                      Kerry Conran 3.78e+07 3.78e+07       NA 3.78e+07
+## 587                         Joan Chen 3.78e+07 3.78e+07       NA 3.78e+07
+## 632                      John Hoffman 3.76e+07 3.76e+07       NA 3.76e+07
+## 20                          Alan Poul 3.75e+07 3.75e+07       NA 3.75e+07
+## 201         Christian E. Christiansen 3.73e+07 3.73e+07       NA 3.73e+07
+## 352                     Edward Norton 3.70e+07 3.70e+07       NA 3.70e+07
+## 212                      Chuck Sheetz 3.67e+07 3.67e+07       NA 3.67e+07
+## 333                        Don Siegel 3.65e+07 3.65e+07       NA 3.65e+07
+## 1284                       Todd Graff 3.61e+07 1.81e+07 1.82e+07 1.81e+07
+## 1337                      Walter Hill 3.61e+07 1.20e+07 2.39e+06 1.24e+07
+## 89                         Barry Cook 3.61e+07 3.61e+07       NA 3.61e+07
+## 173                  Cecil B. DeMille 3.60e+07 3.60e+07       NA 3.60e+07
+## 480                      Henry Koster 3.60e+07 3.60e+07       NA 3.60e+07
+## 49                     Andrew Bergman 3.58e+07 1.79e+07 2.11e+07 1.79e+07
+## 75                      Anton Corbijn 3.56e+07 3.56e+07       NA 3.56e+07
+## 242                         Dan Mazer 3.55e+07 3.55e+07       NA 3.55e+07
+## 456                      Gregory Nava 3.54e+07 3.54e+07       NA 3.54e+07
+## 693                      Joseph Ruben 3.53e+07 3.53e+07       NA 3.53e+07
+## 509                     Jake Schreier 3.53e+07 1.77e+07 2.03e+07 1.77e+07
+## 39                     Alfonso Cuaron 3.53e+07 3.53e+07       NA 3.53e+07
+## 1330                     Victor Salva 3.51e+07 3.51e+07       NA 3.51e+07
+## 956                 Nicole Holofcener 3.51e+07 1.17e+07 6.83e+06 1.34e+07
+## 1172                      Scott Speer 3.51e+07 3.51e+07       NA 3.51e+07
+## 955              Nicolas Winding Refn 3.51e+07 3.51e+07       NA 3.51e+07
+## 1289            Todd Strauss-Schulson 3.50e+07 3.50e+07       NA 3.50e+07
+## 817                     Mark Helfrich 3.50e+07 3.50e+07       NA 3.50e+07
+## 500                        J Blakeson 3.49e+07 3.49e+07       NA 3.49e+07
+## 1109                    Robert Harmon 3.49e+07 1.74e+07 6.71e+06 1.74e+07
+## 834                   Martin Lawrence 3.47e+07 3.47e+07       NA 3.47e+07
+## 780                   Liz Friedlander 3.47e+07 3.47e+07       NA 3.47e+07
+## 383               Florent-Emilio Siri 3.46e+07 3.46e+07       NA 3.46e+07
+## 518                        James Gray 3.46e+07 8.64e+06 1.33e+07 2.57e+06
+## 1133               Roger Spottiswoode 3.45e+07 3.45e+07       NA 3.45e+07
+## 424                   George Armitage 3.45e+07 1.72e+07 1.52e+07 1.72e+07
+## 1308                    Tommy O&#39;Haver 3.45e+07 1.72e+07 8.03e+06 1.72e+07
+## 989                     Patty Jenkins 3.45e+07 3.45e+07       NA 3.45e+07
+## 745                  Kevin Tancharoen 3.43e+07 1.72e+07 7.49e+06 1.72e+07
+## 78                         Ari Sandel 3.40e+07 3.40e+07       NA 3.40e+07
+## 253                      Danny DeVito 3.39e+07 1.70e+07 1.03e+07 1.70e+07
+## 1037                      Phil Traill 3.39e+07 3.39e+07       NA 3.39e+07
+## 846                     Matt Williams 3.38e+07 3.38e+07       NA 3.38e+07
+## 679                Jonathan Hensleigh 3.37e+07 3.37e+07       NA 3.37e+07
+## 730                     Kent Alterman 3.35e+07 3.35e+07       NA 3.35e+07
+## 646              John Patrick Shanley 3.34e+07 3.34e+07       NA 3.34e+07
+## 1187                  Sheldon Lettich 3.34e+07 1.67e+07 1.90e+07 1.67e+07
+## 323                    Dinesh D&#39;Souza 3.33e+07 3.33e+07       NA 3.33e+07
+## 893                   Michael Schultz 3.30e+07 3.30e+07       NA 3.30e+07
+## 810                      Marcus Raboy 3.30e+07 3.30e+07       NA 3.30e+07
+## 627                       John Gatins 3.27e+07 3.27e+07       NA 3.27e+07
+## 124                       Bonnie Hunt 3.27e+07 3.27e+07       NA 3.27e+07
+## 695                       Joseph Zito 3.26e+07 3.26e+07       NA 3.26e+07
+## 206                Christopher Landon 3.25e+07 3.25e+07       NA 3.25e+07
+## 449                      Grant Heslov 3.24e+07 3.24e+07       NA 3.24e+07
+## 912                       Mike Figgis 3.24e+07 1.62e+07 2.23e+07 1.62e+07
+## 240                        Dan Gilroy 3.23e+07 3.23e+07       NA 3.23e+07
+## 775                      Leslie Small 3.22e+07 3.22e+07       NA 3.22e+07
+## 807                    Marco Schnabel 3.22e+07 3.22e+07       NA 3.22e+07
+## 484                Hironobu Sakaguchi 3.21e+07 3.21e+07       NA 3.21e+07
+## 1311                     Tony Goldwyn 3.21e+07 1.60e+07 1.60e+07 1.60e+07
+## 1150                  Russell Mulcahy 3.21e+07 3.21e+07       NA 3.21e+07
+## 986              Patrick Read Johnson 3.20e+07 1.60e+07 9.21e+05 1.60e+07
+## 1031                    Peter Sollett 3.20e+07 1.60e+07 2.19e+07 1.60e+07
+## 40                   Alfred Hitchcock 3.20e+07 3.20e+07       NA 3.20e+07
+## 752                  Kirsten Sheridan 3.17e+07 3.17e+07       NA 3.17e+07
+## 228                      Craig Brewer 3.16e+07 1.58e+07 9.05e+06 1.58e+07
+## 825                      Mark Romanek 3.16e+07 3.16e+07       NA 3.16e+07
+## 580                   Jim Field Smith 3.16e+07 3.16e+07       NA 3.16e+07
+## 777                   Levan Gabriadze 3.15e+07 3.15e+07       NA 3.15e+07
+## 350                      Edgar Wright 3.15e+07 3.15e+07       NA 3.15e+07
+## 289                      David Moreau 3.14e+07 3.14e+07       NA 3.14e+07
+## 204                Christopher Erskin 3.12e+07 3.12e+07       NA 3.12e+07
+## 319                  Derek Cianfrance 3.11e+07 1.55e+07 8.26e+06 1.55e+07
+## 189                      Chris Kentis 3.05e+07 3.05e+07       NA 3.05e+07
+## 1364                       Zach Braff 3.04e+07 1.52e+07 1.64e+07 1.52e+07
+## 623                  John Fortenberry 3.03e+07 3.03e+07       NA 3.03e+07
+## 120                        Bob Dolman 3.03e+07 3.03e+07       NA 3.03e+07
+## 1085                   Rick Rosenthal 3.03e+07 3.03e+07       NA 3.03e+07
+## 200                  Christian Duguay 3.02e+07 3.02e+07       NA 3.02e+07
+## 1143                 Rowdy Herrington 3.01e+07 3.01e+07       NA 3.01e+07
+## 505                      Jack Sholder 3.00e+07 3.00e+07       NA 3.00e+07
+## 598                      Joe Nussbaum 2.99e+07 9.96e+06 1.82e+06 1.01e+07
+## 640                   John McNaughton 2.98e+07 2.98e+07       NA 2.98e+07
+## 748                       Kinka Usher 2.97e+07 2.97e+07       NA 2.97e+07
+## 231                   Craig R. Baxley 2.95e+07 1.48e+07 7.76e+06 1.48e+07
+## 827                       Mark Rydell 2.92e+07 2.92e+07       NA 2.92e+07
+## 347                         Ed Decter 2.90e+07 2.90e+07       NA 2.90e+07
+## 595                     Joe Charbanic 2.89e+07 2.89e+07       NA 2.89e+07
+## 633                        John Lafia 2.85e+07 2.85e+07       NA 2.85e+07
+## 451                     Greg Coolidge 2.84e+07 2.84e+07       NA 2.84e+07
+## 420                     Gene Quintano 2.80e+07 2.80e+07       NA 2.80e+07
+## 294                       David Raynr 2.79e+07 1.40e+07 7.39e+06 1.40e+07
+## 247                      Daniel Barnz 2.79e+07 2.79e+07       NA 2.79e+07
+## 913                     Mike Flanagan 2.77e+07 2.77e+07       NA 2.77e+07
+## 411                     Gary Hardwick 2.75e+07 2.75e+07       NA 2.75e+07
+## 285                       David Lynch 2.74e+07 2.74e+07       NA 2.74e+07
+## 143                      Brian Henson 2.73e+07 2.73e+07       NA 2.73e+07
+## 119                         Bob Clark 2.71e+07 2.71e+07       NA 2.71e+07
+## 205                 Christopher Guest 2.71e+07 9.02e+06 8.42e+06 5.54e+06
+## 751                         Kirk Wong 2.71e+07 2.71e+07       NA 2.71e+07
+## 1084                   Rick Friedberg 2.69e+07 2.69e+07       NA 2.69e+07
+## 322                     Diane English 2.69e+07 2.69e+07       NA 2.69e+07
+## 1207              Stephen J. Anderson 2.67e+07 2.67e+07       NA 2.67e+07
+## 375                    Ethan Maniquis 2.66e+07 2.66e+07       NA 2.66e+07
+## 540                        Jason Zada 2.66e+07 2.66e+07       NA 2.66e+07
+## 150                    Bronwen Hughes 2.65e+07 2.65e+07       NA 2.65e+07
+## 591                     Joe Berlinger 2.64e+07 2.64e+07       NA 2.64e+07
+## 1072                Richard Fleischer 2.64e+07 2.64e+07       NA 2.64e+07
+## 983                   Patrick Gilmore 2.63e+07 2.63e+07       NA 2.63e+07
+## 1318                      Troy Miller 2.61e+07 2.61e+07       NA 2.61e+07
+## 1293                     Tom Gormican 2.60e+07 2.60e+07       NA 2.60e+07
+## 321                       Des McAnuff 2.60e+07 2.60e+07       NA 2.60e+07
+## 1168                      Scott Frank 2.60e+07 2.60e+07       NA 2.60e+07
+## 839                   Masayuki Ochiai 2.59e+07 2.59e+07       NA 2.59e+07
+## 230                       Craig Mazin 2.59e+07 1.29e+07 1.83e+07 1.29e+07
+## 278                        David Gelb 2.58e+07 2.58e+07       NA 2.58e+07
+## 667                         Jon Lucas 2.57e+07 2.57e+07       NA 2.57e+07
+## 238               Damien Dante Wayans 2.56e+07 2.56e+07       NA 2.56e+07
+## 1069                 Richard Benjamin 2.56e+07 8.52e+06 6.25e+06 1.01e+07
+## 1338                    Walter Salles 2.55e+07 2.55e+07       NA 2.55e+07
+## 970                Olatunde Osunsanmi 2.55e+07 2.55e+07       NA 2.55e+07
+## 1304                       Tom Tykwer 2.55e+07 2.55e+07       NA 2.55e+07
+## 473                      Harry Elfont 2.53e+07 2.53e+07       NA 2.53e+07
+## 239                      Dan Cutforth 2.52e+07 2.52e+07       NA 2.52e+07
+## 979                      Pat O&#39;Connor 2.52e+07 2.52e+07       NA 2.52e+07
+## 1107                    Robert Eggers 2.51e+07 2.51e+07       NA 2.51e+07
+## 69                       Anthony Bell 2.51e+07 2.51e+07       NA 2.51e+07
+## 114                      Billy Wilder 2.50e+07 2.50e+07       NA 2.50e+07
+## 860                  Michael Anderson 2.50e+07 2.50e+07       NA 2.50e+07
+## 573                      Jesse Peretz 2.48e+07 2.48e+07       NA 2.48e+07
+## 690              Joseph Gordon-Levitt 2.45e+07 2.45e+07       NA 2.45e+07
+## 59                        Andy Cadiff 2.44e+07 1.22e+07 0.00e+00 1.22e+07
+## 998                     Paul McGuigan 2.44e+07 8.13e+06 4.07e+06 5.77e+06
+## 630                     John Herzfeld 2.44e+07 2.44e+07       NA 2.44e+07
+## 136                     Brett Leonard 2.40e+07 2.40e+07       NA 2.40e+07
+## 1319                       Troy Nixey 2.40e+07 2.40e+07       NA 2.40e+07
+## 590                         Jody Hill 2.40e+07 2.40e+07       NA 2.40e+07
+## 1098                       Rob Pritts 2.40e+07 2.40e+07       NA 2.40e+07
+## 1359                    William Wyler 2.36e+07 2.36e+07       NA 2.36e+07
+## 1139                      Ron Maxwell 2.36e+07 1.18e+07 1.49e+06 1.18e+07
+## 1182                      Shana Feste 2.35e+07 1.18e+07 1.65e+07 1.18e+07
+## 559                      Jeff Nichols 2.33e+07 1.17e+07 1.40e+07 1.17e+07
+## 732                       Kevin Allen 2.32e+07 2.32e+07       NA 2.32e+07
+## 42                   Alister Grierson 2.31e+07 2.31e+07       NA 2.31e+07
+## 925                         Mira Nair 2.31e+07 7.69e+06 7.33e+06 4.11e+06
+## 494                          Ice Cube 2.30e+07 2.30e+07       NA 2.30e+07
+## 996                       Paul Hunter 2.30e+07 2.30e+07       NA 2.30e+07
+## 131                      Brandon Camp 2.29e+07 2.29e+07       NA 2.29e+07
+## 1314                     Travis Cluff 2.28e+07 2.28e+07       NA 2.28e+07
+## 403                  Frederik Du Chau 2.27e+07 2.27e+07       NA 2.27e+07
+## 332                      Don Scardino 2.25e+07 2.25e+07       NA 2.25e+07
+## 1038                 Philip G. Atwell 2.25e+07 2.25e+07       NA 2.25e+07
+## 308                    Dean Israelite 2.23e+07 2.23e+07       NA 2.23e+07
+## 815                        Mark Brown 2.23e+07 1.12e+07 1.57e+07 1.12e+07
+## 907                      Mike Bigelow 2.23e+07 2.23e+07       NA 2.23e+07
+## 566                      Jeremy Leven 2.22e+07 2.22e+07       NA 2.22e+07
+## 882                     Michael Mayer 2.20e+07 1.10e+07 1.41e+07 1.10e+07
+## 715                      Kasi Lemmons 2.18e+07 1.09e+07 5.52e+06 1.09e+07
+## 958                        Nigel Cole 2.18e+07 2.18e+07       NA 2.18e+07
+## 711                    Justin Zackham 2.18e+07 2.18e+07       NA 2.18e+07
+## 274                  David E. Talbert 2.16e+07 2.16e+07       NA 2.16e+07
+## 936                         Nat Faxon 2.15e+07 2.15e+07       NA 2.15e+07
+## 1039                   Philip Kaufman 2.15e+07 2.15e+07       NA 2.15e+07
+## 147                    Brian Percival 2.15e+07 2.15e+07       NA 2.15e+07
+## 1129                  Roger Christian 2.15e+07 2.15e+07       NA 2.15e+07
+## 644                       John Ottman 2.15e+07 2.15e+07       NA 2.15e+07
+## 188                       Chris Gorak 2.14e+07 2.14e+07       NA 2.14e+07
+## 1052                      Rand Ravich 2.13e+07 1.07e+07 0.00e+00 1.07e+07
+## 256                   Danny Steinmann 2.13e+07 2.13e+07       NA 2.13e+07
+## 691                       Joseph Kahn 2.12e+07 2.12e+07       NA 2.12e+07
+## 995                       Paul Haggis 2.11e+07 2.11e+07       NA 2.11e+07
+## 372               Ernest R. Dickerson 2.11e+07 2.11e+07       NA 2.11e+07
+## 186                      Chris Carter 2.10e+07 2.10e+07       NA 2.10e+07
+## 779                   Lisa Cholodenko 2.08e+07 2.08e+07       NA 2.08e+07
+## 836                      Martin Weisz 2.08e+07 2.08e+07       NA 2.08e+07
+## 470                      Harold Cronk 2.08e+07 2.08e+07       NA 2.08e+07
+## 694                    Joseph Sargent 2.08e+07 2.08e+07       NA 2.08e+07
+## 1106                    Robert Duvall 2.07e+07 2.07e+07       NA 2.07e+07
+## 1013                    Peter Atencio 2.06e+07 2.06e+07       NA 2.06e+07
+## 953                       Nick Hurran 2.04e+07 2.04e+07       NA 2.04e+07
+## 628                         John Gray 2.04e+07 2.04e+07       NA 2.04e+07
+## 747                        King Vidor 2.04e+07 2.04e+07       NA 2.04e+07
+## 1073                  Richard Glatzer 2.03e+07 1.02e+07 1.20e+07 1.02e+07
+## 1103                Robert Ben Garant 2.03e+07 2.03e+07       NA 2.03e+07
+## 1102                    Robert Altman 2.03e+07 2.03e+07       NA 2.03e+07
+## 585                       Jim Sonzero 2.03e+07 2.03e+07       NA 2.03e+07
+## 22                       Alan Shapiro 2.00e+07 2.00e+07       NA 2.00e+07
+## 753                     Kris Isacsson 2.00e+07 2.00e+07       NA 2.00e+07
+## 547              Jean-Francois Richet 2.00e+07 2.00e+07       NA 2.00e+07
+## 325                           DJ Pooh 1.99e+07 9.96e+06 1.95e+05 9.96e+06
+## 1285                      Todd Haynes 1.99e+07 9.93e+06 8.38e+06 9.93e+06
+## 906                    Mikael Salomon 1.98e+07 1.98e+07       NA 1.98e+07
+## 351                      Edward Burns 1.97e+07 9.85e+06 5.64e+05 9.85e+06
+## 44                       Allen Hughes 1.97e+07 1.97e+07       NA 1.97e+07
+## 755                       Kurt Wimmer 1.97e+07 9.85e+06 1.22e+07 9.85e+06
+## 1300                   Tom McLoughlin 1.95e+07 1.95e+07       NA 1.95e+07
+## 851                     Maurice Joyce 1.94e+07 1.94e+07       NA 1.94e+07
+## 1243                    Susan Stroman 1.94e+07 1.94e+07       NA 1.94e+07
+## 429                    George Jackson 1.93e+07 1.93e+07       NA 1.93e+07
+## 615                John Carl Buechler 1.92e+07 1.92e+07       NA 1.92e+07
+## 11                    Adrienne Shelly 1.91e+07 1.91e+07       NA 1.91e+07
+## 43                      Allen Coulter 1.91e+07 1.91e+07       NA 1.91e+07
+## 51                     Andrew Dominik 1.88e+07 9.42e+06 7.80e+06 9.42e+06
+## 612                       John Bonito 1.88e+07 1.88e+07       NA 1.88e+07
+## 82                         Asger Leth 1.86e+07 1.86e+07       NA 1.86e+07
+## 1087                    Ricky Gervais 1.84e+07 1.84e+07       NA 1.84e+07
+## 650                       John Sayles 1.83e+07 6.11e+06 6.22e+06 3.06e+06
+## 772                       Leon Ichaso 1.83e+07 1.83e+07       NA 1.83e+07
+## 93                    Bart Freundlich 1.82e+07 9.12e+06 1.07e+07 9.12e+06
+## 130                    Bradley Parker 1.81e+07 1.81e+07       NA 1.81e+07
+## 888                    Michael Polish 1.81e+07 4.53e+06 4.62e+06 3.06e+06
+## 394                      Frank Nissen 1.81e+07 1.81e+07       NA 1.81e+07
+## 250                   Daniel Sackheim 1.80e+07 1.80e+07       NA 1.80e+07
+## 935                  Nanette Burstein 1.78e+07 1.78e+07       NA 1.78e+07
+## 719                         Katt Shea 1.78e+07 1.78e+07       NA 1.78e+07
+## 1200                  Stephen Chbosky 1.77e+07 1.77e+07       NA 1.77e+07
+## 560                     Jeff Schaffer 1.77e+07 1.77e+07       NA 1.77e+07
+## 445             Gonzalo Lopez-Gallego 1.77e+07 1.77e+07       NA 1.77e+07
+## 982                   Patricia Rozema 1.77e+07 1.77e+07       NA 1.77e+07
+## 77                     Antony Hoffman 1.75e+07 1.75e+07       NA 1.75e+07
+## 170                      Carter Smith 1.74e+07 1.74e+07       NA 1.74e+07
+## 819                    Mark L. Lester 1.74e+07 8.69e+06 9.07e+06 8.69e+06
+## 360                    Ellory Elkayem 1.73e+07 1.73e+07       NA 1.73e+07
+## 1179                    Sergey Bodrov 1.72e+07 1.72e+07       NA 1.72e+07
+## 737                       Kevin Hooks 1.71e+07 1.71e+07       NA 1.71e+07
+## 609                 John &#39;Bud&#39; Cardos 1.70e+07 1.70e+07       NA 1.70e+07
+## 1020                   Peter Hastings 1.70e+07 1.70e+07       NA 1.70e+07
+## 99                        Ben Younger 1.69e+07 1.69e+07       NA 1.69e+07
+## 533                   Janusz Kaminski 1.68e+07 1.68e+07       NA 1.68e+07
+## 673                       Jonas Elmer 1.67e+07 1.67e+07       NA 1.67e+07
+## 1026                  Peter Kosminsky 1.63e+07 1.63e+07       NA 1.63e+07
+## 1351                    Willard Huyck 1.63e+07 1.63e+07       NA 1.63e+07
+## 700              Joshua Michael Stern 1.63e+07 1.63e+07       NA 1.63e+07
+## 443                       Glen Morgan 1.62e+07 1.62e+07       NA 1.62e+07
+## 616                       John Carney 1.62e+07 1.62e+07       NA 1.62e+07
+## 513                     James Bridges 1.61e+07 1.61e+07       NA 1.61e+07
+## 458                     Gregory Widen 1.61e+07 1.61e+07       NA 1.61e+07
+## 1096                   Rob McKittrick 1.61e+07 1.61e+07       NA 1.61e+07
+## 713                 Karey Kirkpatrick 1.61e+07 1.61e+07       NA 1.61e+07
+## 1266                 Tim Blake Nelson 1.60e+07 1.60e+07       NA 1.60e+07
+## 5                         Adam Marcus 1.59e+07 1.59e+07       NA 1.59e+07
+## 841             Matt Bettinelli-Olpin 1.58e+07 1.58e+07       NA 1.58e+07
+## 1074                    Richard Kelly 1.58e+07 7.89e+06 1.01e+07 7.89e+06
+## 312               Demian Lichtenstein 1.57e+07 1.57e+07       NA 1.57e+07
+## 990                      Paul Abascal 1.57e+07 1.57e+07       NA 1.57e+07
+## 1315                     Trent Cooper 1.57e+07 1.57e+07       NA 1.57e+07
+## 1155                              RZA 1.56e+07 1.56e+07       NA 1.56e+07
+## 991                       Paul Bolger 1.55e+07 1.55e+07       NA 1.55e+07
+## 951                        Nick Gomez 1.54e+07 1.54e+07       NA 1.54e+07
+## 1100                      Rob Schmidt 1.54e+07 1.54e+07       NA 1.54e+07
+## 255                        Danny Pang 1.53e+07 1.53e+07       NA 1.53e+07
+## 856                Melvin Van Peebles 1.52e+07 1.52e+07       NA 1.52e+07
+## 594                     Joe Chappelle 1.51e+07 1.51e+07       NA 1.51e+07
+## 972               Oliver Hirschbiegel 1.51e+07 1.51e+07       NA 1.51e+07
+## 16                          Alan Cohn 1.51e+07 1.51e+07       NA 1.51e+07
+## 837                       Mary Harron 1.50e+07 1.50e+07       NA 1.50e+07
+## 963                     Noah Baumbach 1.49e+07 7.47e+06 1.50e+05 7.47e+06
+## 154                        Bruce Hunt 1.49e+07 1.49e+07       NA 1.49e+07
+## 295             David Robert Mitchell 1.47e+07 1.47e+07       NA 1.47e+07
+## 1307                Tommy Lee Wallace 1.44e+07 1.44e+07       NA 1.44e+07
+## 355                        Elaine May 1.44e+07 1.44e+07       NA 1.44e+07
+## 588                       Joby Harold 1.44e+07 1.44e+07       NA 1.44e+07
+## 1093                       Rob Hedden 1.43e+07 1.43e+07       NA 1.43e+07
+## 952                         Nick Hamm 1.43e+07 1.43e+07       NA 1.43e+07
+## 1362                Wych Kaosayananda 1.43e+07 1.43e+07       NA 1.43e+07
+## 1294                        Tom Green 1.42e+07 1.42e+07       NA 1.42e+07
+## 468                    Harmony Korine 1.41e+07 1.41e+07       NA 1.41e+07
+## 414                      Gary Sherman 1.41e+07 1.41e+07       NA 1.41e+07
+## 1089                        Ringo Lam 1.41e+07 1.41e+07       NA 1.41e+07
+## 873                   Michael Gornick 1.40e+07 1.40e+07       NA 1.40e+07
+## 1326                    Vic Armstrong 1.40e+07 1.40e+07       NA 1.40e+07
+## 820                        Mark Mylod 1.40e+07 1.40e+07       NA 1.40e+07
+## 576                     Jessy Terrero 1.39e+07 1.39e+07       NA 1.39e+07
+## 135                    Brendan Malloy 1.39e+07 1.39e+07       NA 1.39e+07
+## 783                     Lone Scherfig 1.38e+07 1.38e+07       NA 1.38e+07
+## 904                  Miguel Sapochnik 1.38e+07 1.38e+07       NA 1.38e+07
+## 292                      David Palmer 1.37e+07 1.37e+07       NA 1.37e+07
+## 1320                      Tuck Tucker 1.37e+07 1.37e+07       NA 1.37e+07
+## 574                     Jesse Vaughan 1.36e+07 1.36e+07       NA 1.36e+07
+## 457                   Gregory Poirier 1.36e+07 1.36e+07       NA 1.36e+07
+## 613                      John Boorman 1.35e+07 1.35e+07       NA 1.35e+07
+## 1080                  Richard Shepard 1.34e+07 6.72e+06 8.27e+06 6.72e+06
+## 886                 Michael O. Sajbel 1.34e+07 1.34e+07       NA 1.34e+07
+## 1323                     Ulu Grosbard 1.34e+07 1.34e+07       NA 1.34e+07
+## 902                    Mickey Liddell 1.34e+07 1.34e+07       NA 1.34e+07
+## 1325                   Vadim Perelman 1.33e+07 6.65e+06 8.98e+06 6.65e+06
+## 897                  Michael Wadleigh 1.33e+07 1.33e+07       NA 1.33e+07
+## 198                  Christian Alvart 1.32e+07 1.32e+07       NA 1.32e+07
+## 400                       Fred Savage 1.32e+07 1.32e+07       NA 1.32e+07
+## 1225                       Steve Rash 1.32e+07 6.60e+06 2.69e+06 6.60e+06
+## 109                       Bill Paxton 1.31e+07 1.31e+07       NA 1.31e+07
+## 237                   Damien Chazelle 1.31e+07 1.31e+07       NA 1.31e+07
+## 339                    Drew Barrymore 1.30e+07 1.30e+07       NA 1.30e+07
+## 870                    Michael Dinner 1.30e+07 1.30e+07       NA 1.30e+07
+## 401                       Fred Walton 1.29e+07 1.29e+07       NA 1.29e+07
+## 336               Douglas Aarniokoski 1.28e+07 1.28e+07       NA 1.28e+07
+## 100                      Benh Zeitlin 1.28e+07 1.28e+07       NA 1.28e+07
+## 570                        Jerry Zaks 1.28e+07 1.28e+07       NA 1.28e+07
+## 631                     John Hillcoat 1.27e+07 6.34e+06 8.89e+06 6.34e+06
+## 520                       James Isaac 1.26e+07 1.26e+07       NA 1.26e+07
+## 1112                Robert Marcarelli 1.26e+07 1.26e+07       NA 1.26e+07
+## 157                      Bryan Barber 1.25e+07 1.25e+07       NA 1.25e+07
+## 286                       David Mamet 1.25e+07 6.27e+06 5.55e+06 6.27e+06
+## 1261                 Theodore Witcher 1.25e+07 1.25e+07       NA 1.25e+07
+## 1217                     Steve Carver 1.22e+07 1.22e+07       NA 1.22e+07
+## 202                   Christine Jeffs 1.21e+07 1.21e+07       NA 1.21e+07
+## 553                      Jee-woon Kim 1.20e+07 1.20e+07       NA 1.20e+07
+## 1236                  Stewart Hendler 1.20e+07 1.20e+07       NA 1.20e+07
+## 944                       Newt Arnold 1.18e+07 1.18e+07       NA 1.18e+07
+## 1151                   Rusty Cundieff 1.18e+07 1.18e+07       NA 1.18e+07
+## 182               Charles T. Kanganis 1.18e+07 1.18e+07       NA 1.18e+07
+## 582                         Jim Hanon 1.17e+07 1.17e+07       NA 1.17e+07
+## 543                       Jay Duplass 1.17e+07 5.85e+06 2.27e+06 5.85e+06
+## 327          Dominique Othenin-Girard 1.16e+07 1.16e+07       NA 1.16e+07
+## 410                    Gary Halvorson 1.16e+07 1.16e+07       NA 1.16e+07
+## 24                      Albert Brooks 1.16e+07 1.16e+07       NA 1.16e+07
+## 193                     Chris Roberts 1.16e+07 1.16e+07       NA 1.16e+07
+## 399                        Fred Durst 1.15e+07 1.15e+07       NA 1.15e+07
+## 1104                    Robert Butler 1.15e+07 1.15e+07       NA 1.15e+07
+## 144                     Brian Klugman 1.14e+07 1.14e+07       NA 1.14e+07
+## 491                      Hugh Johnson 1.12e+07 1.12e+07       NA 1.12e+07
+## 362                    Emilio Estevez 1.12e+07 1.12e+07       NA 1.12e+07
+## 502                      J.C. Chandor 1.11e+07 5.55e+06 2.79e+05 5.55e+06
+## 666                        Jon Kasdan 1.10e+07 1.10e+07       NA 1.10e+07
+## 1023                     Peter Howitt 1.10e+07 1.10e+07       NA 1.10e+07
+## 957                 Niels Arden Oplev 1.09e+07 1.09e+07       NA 1.09e+07
+## 337                   Douglas McGrath 1.08e+07 5.39e+06 6.00e+06 5.39e+06
+## 398                       Fred Dekker 1.07e+07 1.07e+07       NA 1.07e+07
+## 1043                     Pierre Morel 1.06e+07 1.06e+07       NA 1.06e+07
+## 108                         Bill Duke 1.06e+07 1.06e+07       NA 1.06e+07
+## 224                      Costa-Gavras 1.06e+07 1.06e+07       NA 1.06e+07
+## 226                  Courtney Solomon 1.05e+07 1.05e+07       NA 1.05e+07
+## 824                    Mark Piznarski 1.05e+07 1.05e+07       NA 1.05e+07
+## 859                       Mic Rodgers 1.04e+07 1.04e+07       NA 1.04e+07
+## 1135                     Roland Joffe 1.04e+07 1.04e+07       NA 1.04e+07
+## 881                    Michael Martin 1.03e+07 1.03e+07       NA 1.03e+07
+## 1317                       Troy Duffy 1.03e+07 1.03e+07       NA 1.03e+07
+## 1335               Wallace Wolodarsky 1.02e+07 1.02e+07       NA 1.02e+07
+## 787                     Louis Morneau 1.01e+07 1.01e+07       NA 1.01e+07
+## 911                         Mike Disa 1.01e+07 1.01e+07       NA 1.01e+07
+## 680                   Jonathan Kaplan 1.01e+07 1.01e+07       NA 1.01e+07
+## 1329                     Victor Nunez 1.01e+07 5.03e+06 5.69e+06 5.03e+06
+## 103                        Benny Boom 1.00e+07 1.00e+07       NA 1.00e+07
+## 798                     Mamoru Hosoda 9.63e+06 9.63e+06       NA 9.63e+06
+## 357                        Elia Kazan 9.60e+06 9.60e+06       NA 9.60e+06
+## 698                     Josh Schwartz 9.40e+06 9.40e+06       NA 9.40e+06
+## 898              Michael Winterbottom 9.39e+06 4.69e+06 6.33e+06 4.69e+06
+## 728                  Kenneth Lonergan 9.23e+06 4.61e+06 6.46e+06 4.61e+06
+## 1                     Aaron Schneider 9.18e+06 9.18e+06       NA 9.18e+06
+## 1292                         Tom Ford 9.17e+06 9.17e+06       NA 9.17e+06
+## 1280                Tina Gordon Chism 9.12e+06 9.12e+06       NA 9.12e+06
+## 343                     Duncan Tucker 9.01e+06 9.01e+06       NA 9.01e+06
+## 1149                       Russ Meyer 9.00e+06 9.00e+06       NA 9.00e+06
+## 104                        Benson Lee 8.89e+06 8.89e+06       NA 8.89e+06
+## 139                    Brian Dannelly 8.79e+06 8.79e+06       NA 8.79e+06
+## 345                  E. Elias Merhige 8.71e+06 8.71e+06       NA 8.71e+06
+## 348                         Ed Harris 8.60e+06 8.60e+06       NA 8.60e+06
+## 931                       Mort Nathan 8.59e+06 8.59e+06       NA 8.59e+06
+## 557                        Jeff Kanew 8.51e+06 8.51e+06       NA 8.51e+06
+## 687                     Jorma Taccone 8.46e+06 8.46e+06       NA 8.46e+06
+## 1219                      Steve James 8.36e+06 4.18e+06 5.16e+06 4.18e+06
+## 1341                     Wayne Kramer 8.24e+06 8.24e+06       NA 8.24e+06
+## 257                    Darnell Martin 8.13e+06 8.13e+06       NA 8.13e+06
+## 973                     Oliver Parker 8.13e+06 8.13e+06       NA 8.13e+06
+## 28               Alejandro Monteverde 8.11e+06 8.11e+06       NA 8.11e+06
+## 1348                      Wil Shriner 8.08e+06 8.08e+06       NA 8.08e+06
+## 306                  Davis Guggenheim 8.06e+06 4.03e+06 1.52e+06 4.03e+06
+## 655                       John Waters 8.06e+06 4.03e+06 5.45e+06 4.03e+06
+## 436                     George Sidney 8.00e+06 8.00e+06       NA 8.00e+06
+## 437                    George Stevens 8.00e+06 8.00e+06       NA 8.00e+06
+## 1352                William A. Fraker 8.00e+06 8.00e+06       NA 8.00e+06
+## 778                    Lexi Alexander 7.95e+06 7.95e+06       NA 7.95e+06
+## 947                  Nicholas Jarecki 7.92e+06 7.92e+06       NA 7.92e+06
+## 207                Christopher Leitch 7.89e+06 7.89e+06       NA 7.89e+06
+## 987                  Patrick Stettner 7.83e+06 7.83e+06       NA 7.83e+06
+## 1288                     Todd Solondz 7.77e+06 3.89e+06 1.25e+06 3.89e+06
+## 536                     Jason Bateman 7.76e+06 7.76e+06       NA 7.76e+06
+## 867                  Michael Corrente 7.69e+06 3.85e+06 4.87e+06 3.85e+06
+## 558                       Jeff Lowell 7.56e+06 7.56e+06       NA 7.56e+06
+## 858                      Menno Meyjes 7.49e+06 7.49e+06       NA 7.49e+06
+## 1191                     Simon Wincer 7.43e+06 7.43e+06       NA 7.43e+06
+## 761                       Larry Clark 7.42e+06 7.42e+06       NA 7.42e+06
+## 263                    Dave Borthwick 7.38e+06 7.38e+06       NA 7.38e+06
+## 329                    Don Coscarelli 7.28e+06 7.28e+06       NA 7.28e+06
+## 614             John Cameron Mitchell 7.24e+06 2.41e+06 5.48e+05 2.22e+06
+## 1343                    Werner Herzog 7.18e+06 3.59e+06 2.68e+06 3.59e+06
+## 918                        Mike Mills 7.10e+06 3.55e+06 3.15e+06 3.55e+06
+## 962                     Nnegest Likke 7.06e+06 7.06e+06       NA 7.06e+06
+## 1165                  Scott Alexander 6.98e+06 6.98e+06       NA 6.98e+06
+## 872                     Michael Dowse 6.92e+06 6.92e+06       NA 6.92e+06
+## 525                    James Ponsoldt 6.85e+06 6.85e+06       NA 6.85e+06
+## 1090               Risa Bramon Garcia 6.85e+06 6.85e+06       NA 6.85e+06
+## 809                    Marcus Dunstan 6.84e+06 6.84e+06       NA 6.84e+06
+## 504                      J.S. Cardone 6.76e+06 6.76e+06       NA 6.76e+06
+## 1312                        Tony Kaye 6.71e+06 6.71e+06       NA 6.71e+06
+## 1058               Raymond De Felitta 6.67e+06 6.67e+06       NA 6.67e+06
+## 784                   Lorene Scafaria 6.62e+06 6.62e+06       NA 6.62e+06
+## 490                       Hugh Hudson 6.54e+06 6.54e+06       NA 6.54e+06
+## 311                      Debra Granik 6.53e+06 6.53e+06       NA 6.53e+06
+## 1128                      Roger Avary 6.53e+06 6.53e+06       NA 6.53e+06
+## 552                        Jeb Stuart 6.48e+06 6.48e+06       NA 6.48e+06
+## 744                      Kevin Spacey 6.47e+06 3.24e+06 4.11e+06 3.24e+06
+## 234                   Cyrus Nowrasteh 6.46e+06 6.46e+06       NA 6.46e+06
+## 1017                   Peter Cattaneo 6.41e+06 6.41e+06       NA 6.41e+06
+## 1327                     Vicky Jenson 6.37e+06 6.37e+06       NA 6.37e+06
+## 67                         Anna Boden 6.35e+06 6.35e+06       NA 6.35e+06
+## 639                      John Maybury 6.30e+06 6.30e+06       NA 6.30e+06
+## 544                         Jay Levey 6.16e+06 6.16e+06       NA 6.16e+06
+## 1262                   Thomas Bezucha 6.06e+06 6.06e+06       NA 6.06e+06
+## 1170                    Scott Kalvert 6.04e+06 6.04e+06       NA 6.04e+06
+## 848                   Matthew Robbins 6.00e+06 6.00e+06       NA 6.00e+06
+## 97                          Ben Lewin 6.00e+06 6.00e+06       NA 6.00e+06
+## 149             Brian Trenchard-Smith 5.97e+06 5.97e+06       NA 5.97e+06
+## 844                     Matt Piedmont 5.90e+06 5.90e+06       NA 5.90e+06
+## 180                 Charles S. Dutton 5.88e+06 5.88e+06       NA 5.88e+06
+## 227                     Craig Bolotin 5.87e+06 5.87e+06       NA 5.87e+06
+## 980                  Patricia Cardoso 5.84e+06 5.84e+06       NA 5.84e+06
+## 331                  Don Michael Paul 5.69e+06 5.69e+06       NA 5.69e+06
+## 808                      Marcos Siega 5.65e+06 5.65e+06       NA 5.65e+06
+## 843                    Matt Maiellaro 5.52e+06 5.52e+06       NA 5.52e+06
+## 1251                   Tamara Jenkins 5.48e+06 5.48e+06       NA 5.48e+06
+## 464                       Hal Needham 5.33e+06 5.33e+06       NA 5.33e+06
+## 1120                  Robert Townsend 5.23e+06 5.23e+06       NA 5.23e+06
+## 381                       Fina Torres 5.02e+06 5.02e+06       NA 5.02e+06
+## 678                   Jonathan Glazer 5.01e+06 5.01e+06       NA 5.01e+06
+## 115                       Blair Hayes 5.00e+06 5.00e+06       NA 5.00e+06
+## 116                     Blake Edwards 5.00e+06 5.00e+06       NA 5.00e+06
+## 376                     Eugene Lourie 5.00e+06 5.00e+06       NA 5.00e+06
+## 929                    Morgan Neville 4.95e+06 4.95e+06       NA 4.95e+06
+## 1286                     Todd Lincoln 4.93e+06 4.93e+06       NA 4.93e+06
+## 156                     Bruce Paltrow 4.73e+06 4.73e+06       NA 4.73e+06
+## 927                       Mitch Davis 4.72e+06 4.72e+06       NA 4.72e+06
+## 310                         Deb Hagan 4.69e+06 4.69e+06       NA 4.69e+06
+## 1272                       Tim Hunter 4.60e+06 4.60e+06       NA 4.60e+06
+## 1365                     Zach Cregger 4.54e+06 4.54e+06       NA 4.54e+06
+## 145                   Brian Koppelman 4.36e+06 4.36e+06       NA 4.36e+06
+## 366                        Eric Bross 4.36e+06 4.36e+06       NA 4.36e+06
+## 475                      Hart Bochner 4.35e+06 4.35e+06       NA 4.35e+06
+## 45                     Allison Anders 4.30e+06 4.30e+06       NA 4.30e+06
+## 1334               Vondie Curtis-Hall 4.27e+06 4.27e+06       NA 4.27e+06
+## 1232                 Steven Shainberg 4.27e+06 2.13e+06 2.71e+06 2.13e+06
+## 800                      Marc Abraham 4.23e+06 4.23e+06       NA 4.23e+06
+## 8                         Adam Rifkin 4.19e+06 4.19e+06       NA 4.19e+06
+## 1027                   Peter M. Cohen 4.14e+06 4.14e+06       NA 4.14e+06
+## 179             Charles Robert Carner 4.13e+06 4.13e+06       NA 4.13e+06
+## 1054                   Randall Miller 4.04e+06 4.04e+06       NA 4.04e+06
+## 563                   Jeffrey W. Byrd 4.01e+06 4.01e+06       NA 4.01e+06
+## 1125                   Rodman Flender 4.00e+06 4.00e+06       NA 4.00e+06
+## 1158                  Sam Firstenberg 4.00e+06 4.00e+06       NA 4.00e+06
+## 669                          Jon Poll 3.95e+06 3.95e+06       NA 3.95e+06
+## 71                     Anthony Hickox 3.90e+06 3.90e+06       NA 3.90e+06
+## 926                      Miranda July 3.89e+06 3.89e+06       NA 3.89e+06
+## 138                       Brian Baugh 3.77e+06 3.77e+06       NA 3.77e+06
+## 890                   Michael Radford 3.75e+06 3.75e+06       NA 3.75e+06
+## 794                 Mabrouk El Mechri 3.75e+06 3.75e+06       NA 3.75e+06
+## 1082                 Rick de Oliveira 3.71e+06 3.71e+06       NA 3.71e+06
+## 868                    Michael Cuesta 3.59e+06 1.79e+06 9.22e+05 1.79e+06
+## 384                 Floria Sigismondi 3.57e+06 3.57e+06       NA 3.57e+06
+## 1302                     Tom Schulman 3.56e+06 3.56e+06       NA 3.56e+06
+## 916                       Mike Marvin 3.50e+06 3.50e+06       NA 3.50e+06
+## 567                   Jeremy Saulnier 3.48e+06 1.74e+06 2.09e+06 1.74e+06
+## 795                      Maggie Carey 3.45e+06 3.45e+06       NA 3.45e+06
+## 341                      Duke Johnson 3.44e+06 3.44e+06       NA 3.44e+06
+## 338                     Drake Doremus 3.39e+06 3.39e+06       NA 3.39e+06
+## 648                        John Putch 3.33e+06 3.33e+06       NA 3.33e+06
+## 785                        Louis C.K. 3.29e+06 3.29e+06       NA 3.29e+06
+## 577                     Jill Sprecher 3.29e+06 3.29e+06       NA 3.29e+06
+## 1000                    Paul Schrader 3.21e+06 1.07e+06 1.01e+06 1.10e+06
+## 1242                  Susan Seidelman 3.12e+06 3.12e+06       NA 3.12e+06
+## 1199                Stephen Carpenter 3.10e+06 3.10e+06       NA 3.10e+06
+## 671                       Jon Stewart 3.09e+06 3.09e+06       NA 3.09e+06
+## 183                   Charlie Kaufman 3.08e+06 3.08e+06       NA 3.08e+06
+## 84                        Atom Egoyan 3.07e+06 3.07e+06       NA 3.07e+06
+## 261                      Darren Stein 3.07e+06 3.07e+06       NA 3.07e+06
+## 467                   Harley Cokeliss 3.06e+06 3.06e+06       NA 3.06e+06
+## 796                  Maggie Greenwald 3.05e+06 3.05e+06       NA 3.05e+06
+## 474                 Harry F. Millarde 3.00e+06 3.00e+06       NA 3.00e+06
+## 828                     Mark Sandrich 3.00e+06 3.00e+06       NA 3.00e+06
+## 705                   Julian Schnabel 2.96e+06 2.96e+06       NA 2.96e+06
+## 1333                Vincente Minnelli 2.96e+06 2.96e+06       NA 2.96e+06
+## 1347                    Whit Stillman 2.94e+06 2.94e+06       NA 2.94e+06
+## 214                       Clark Gregg 2.93e+06 2.93e+06       NA 2.93e+06
+## 1276                      Tim Robbins 2.90e+06 2.90e+06       NA 2.90e+06
+## 269                        David Boyd 2.86e+06 2.86e+06       NA 2.86e+06
+## 1244                     Susanne Bier 2.85e+06 2.85e+06       NA 2.85e+06
+## 290                       David Nixon 2.85e+06 2.85e+06       NA 2.85e+06
+## 1363                   Youssef Delara 2.83e+06 2.83e+06       NA 2.83e+06
+## 472                    Harry Beaumont 2.81e+06 2.81e+06       NA 2.81e+06
+## 1353                William A. Graham 2.81e+06 2.81e+06       NA 2.81e+06
+## 555                     Jeff Franklin 2.80e+06 2.80e+06       NA 2.80e+06
+## 1331                    Vincent Gallo 2.73e+06 1.37e+06 1.41e+06 1.37e+06
+## 850                        Matty Rich 2.71e+06 2.71e+06       NA 2.71e+06
+## 243                          Dan Rush 2.71e+06 2.71e+06       NA 2.71e+06
+## 1153                       Ryan Fleck 2.69e+06 2.69e+06       NA 2.69e+06
+## 1137                       Ron Fricke 2.60e+06 2.60e+06       NA 2.60e+06
+## 529                      Jamie Babbit 2.58e+06 1.29e+06 1.29e+06 1.29e+06
+## 569                     Jerry Jameson 2.56e+06 2.56e+06       NA 2.56e+06
+## 225                     Courtney Hunt 2.51e+06 2.51e+06       NA 2.51e+06
+## 61                        Andy Garcia 2.48e+06 2.48e+06       NA 2.48e+06
+## 1306                  Tommy Lee Jones 2.43e+06 2.43e+06       NA 2.43e+06
+## 1290                        Tom Brady 2.33e+06 2.33e+06       NA 2.33e+06
+## 781                       Lloyd Bacon 2.30e+06 2.30e+06       NA 2.30e+06
+## 66                       Angelo Pizzo 2.25e+06 2.25e+06       NA 2.25e+06
+## 427                      George Gallo 2.24e+06 1.12e+06 1.56e+06 1.12e+06
+## 113                         Billy Ray 2.21e+06 2.21e+06       NA 2.21e+06
+## 734                      Kevin Brodie 2.15e+06 2.15e+06       NA 2.15e+06
+## 361                    Emile Ardolino 2.12e+06 2.12e+06       NA 2.12e+06
+## 997                     Paul Mazursky 2.10e+06 2.10e+06       NA 2.10e+06
+## 92                 Barry W. Blaustein 2.05e+06 2.05e+06       NA 2.05e+06
+## 266                      David Atkins 2.03e+06 2.03e+06       NA 2.03e+06
+## 1212             Sterling Van Wagenen 2.02e+06 2.02e+06       NA 2.02e+06
+## 526                      James Toback 2.01e+06 1.00e+06 1.34e+06 1.00e+06
+## 934                      Nancy Walker 2.00e+06 2.00e+06       NA 2.00e+06
+## 966                     Noel Marshall 2.00e+06 2.00e+06       NA 2.00e+06
+## 811                    Maria Maggenti 1.98e+06 1.98e+06       NA 1.98e+06
+## 76                   Antonio Banderas 1.95e+06 1.95e+06       NA 1.95e+06
+## 864                   Michael Chapman 1.95e+06 1.95e+06       NA 1.95e+06
+## 818                      Mark Illsley 1.94e+06 1.94e+06       NA 1.94e+06
+## 80                       Ariel Vromen 1.94e+06 1.94e+06       NA 1.94e+06
+## 1269                     Tim Chambers 1.89e+06 1.89e+06       NA 1.89e+06
+## 618                       John Curran 1.80e+06 1.80e+06       NA 1.80e+06
+## 1016                       Peter Care 1.78e+06 1.78e+06       NA 1.78e+06
+## 450                     Greg Berlanti 1.74e+06 1.74e+06       NA 1.74e+06
+## 391                    Frank LaLoggia 1.71e+06 1.71e+06       NA 1.71e+06
+## 727                   Kenneth Johnson 1.69e+06 1.69e+06       NA 1.69e+06
+## 192                       Chris Paine 1.68e+06 1.68e+06       NA 1.68e+06
+## 428               George Hickenlooper 1.65e+06 1.65e+06       NA 1.65e+06
+## 363                     Eric Blakeney 1.63e+06 1.63e+06       NA 1.63e+06
+## 1324                         Uwe Boll 1.55e+06 1.55e+06       NA 1.55e+06
+## 476                  Henry Alex Rubin 1.52e+06 1.52e+06       NA 1.52e+06
+## 496                         Ira Sachs 1.51e+06 1.51e+06       NA 1.51e+06
+## 865                    Michael Cimino 1.50e+06 1.50e+06       NA 1.50e+06
+## 812                   Marielle Heller 1.48e+06 1.48e+06       NA 1.48e+06
+## 320                     Derrick Borte 1.47e+06 1.47e+06       NA 1.47e+06
+## 176                  Charles Ferguson 1.43e+06 1.43e+06       NA 1.43e+06
+## 554                         Jeff Burr 1.40e+06 1.40e+06       NA 1.40e+06
+## 910                       Mike Cahill 1.32e+06 1.32e+06       NA 1.32e+06
+## 452                     Greg Harrison 1.31e+06 6.53e+05 6.53e+05 6.53e+05
+## 874                    Michael Haneke 1.29e+06 1.29e+06       NA 1.29e+06
+## 41                     Alison Maclean 1.28e+06 1.28e+06       NA 1.28e+06
+## 531                      Jamie Travis 1.24e+06 1.24e+06       NA 1.24e+06
+## 3                        Abel Ferrara 1.23e+06 1.23e+06       NA 1.23e+06
+## 664                          Jon Hess 1.20e+06 1.20e+06       NA 1.20e+06
+## 740                      Kevin Munroe 1.18e+06 1.18e+06       NA 1.18e+06
+## 1340                      Wayne Beach 1.18e+06 1.18e+06       NA 1.18e+06
+## 723                   Kelly Reichardt 1.11e+06 5.56e+05 4.25e+05 5.56e+05
+## 1126                   Rodrigo Garcia 1.11e+06 1.11e+06       NA 1.11e+06
+## 412                       Gary Rogers 1.10e+06 1.10e+06       NA 1.10e+06
+## 122                      Bob Rafelson 1.08e+06 1.08e+06       NA 1.08e+06
+## 515                         James Cox 1.06e+06 1.06e+06       NA 1.06e+06
+## 423                  George A. Romero 1.05e+06 5.27e+05 6.02e+05 5.27e+05
+## 670                         Jon Shear 1.03e+06 1.03e+06       NA 1.03e+06
+## 805                        Marc Levin 9.82e+05 9.82e+05       NA 9.82e+05
+## 380                     Fenton Bailey 9.50e+05 4.75e+05 2.52e+05 4.75e+05
+## 689                     Joseph Dorman 9.07e+05 9.07e+05       NA 9.07e+05
+## 1045             Piyush Dinker Pandya 9.03e+05 9.03e+05       NA 9.03e+05
+## 121                      Bob Odenkirk 9.01e+05 9.01e+05       NA 9.01e+05
+## 802                        Marc Forby 8.84e+05 8.84e+05       NA 8.84e+05
+## 1248                     Sylvio Tabet 8.69e+05 8.69e+05       NA 8.69e+05
+## 169                   Carroll Ballard 8.60e+05 8.60e+05       NA 8.60e+05
+## 161                        C. Jay Cox 8.52e+05 4.26e+05 5.57e+05 4.26e+05
+## 1215                    Steve Buscemi 8.49e+05 4.25e+05 3.83e+05 4.25e+05
+## 397             Franklin J. Schaffner 8.00e+05 8.00e+05       NA 8.00e+05
+## 1145                  Ruggero Deodato 8.00e+05 8.00e+05       NA 8.00e+05
+## 1071                  Richard Dutcher 7.98e+05 7.98e+05       NA 7.98e+05
+## 875                      Michael Herz 7.93e+05 7.93e+05       NA 7.93e+05
+## 1119                     Robert Towne 7.77e+05 7.77e+05       NA 7.77e+05
+## 303                        David Wain 7.66e+05 7.66e+05       NA 7.66e+05
+## 1059                   Rebecca Miller 7.12e+05 7.12e+05       NA 7.12e+05
+## 465                          Ham Tran 6.39e+05 6.39e+05       NA 6.39e+05
+## 1066                       Rich Cowan 6.09e+05 6.09e+05       NA 6.09e+05
+## 506                 Jacob Aaron Estes 6.04e+05 6.04e+05       NA 6.04e+05
+## 1226                     Steve Taylor 5.95e+05 5.95e+05       NA 5.95e+05
+## 674                 Jonathan Caouette 5.92e+05 5.92e+05       NA 5.92e+05
+## 701                     Joshua Seftel 5.79e+05 5.79e+05       NA 5.79e+05
+## 281                    David Jacobson 5.69e+05 5.69e+05       NA 5.69e+05
+## 831                     Mars Callahan 5.62e+05 5.62e+05       NA 5.62e+05
+## 932                   Myles Berkowitz 5.37e+05 5.37e+05       NA 5.37e+05
+## 488                        Huck Botko 5.35e+05 5.35e+05       NA 5.35e+05
+## 801                     Marc F. Adler 5.12e+05 5.12e+05       NA 5.12e+05
+## 222                        Corey Yuen 4.80e+05 4.80e+05       NA 4.80e+05
+## 382                       Finn Taylor 4.65e+05 4.65e+05       NA 4.65e+05
+## 712                   Karen Moncrieff 4.64e+05 4.64e+05       NA 4.64e+05
+## 1185            Shari Springer Berman 4.53e+05 4.53e+05       NA 4.53e+05
+## 1250                   Takeshi Kitano 4.48e+05 4.48e+05       NA 4.48e+05
+## 510                        Jamal Hill 4.44e+05 4.44e+05       NA 4.44e+05
+## 928                 Morgan J. Freeman 4.33e+05 2.17e+05 1.66e+05 2.17e+05
+## 1057                       Ray Griggs 4.26e+05 4.26e+05       NA 4.26e+05
+## 1184                    Shane Carruth 4.25e+05 4.25e+05       NA 4.25e+05
+## 776                   Leslye Headland 4.18e+05 4.18e+05       NA 4.18e+05
+## 477                        Henry Bean 4.06e+05 4.06e+05       NA 4.06e+05
+## 1081                      Rick Bieber 4.00e+05 4.00e+05       NA 4.00e+05
+## 771                       Lena Dunham 3.90e+05 3.90e+05       NA 3.90e+05
+## 1193                   Spencer Susser 3.83e+05 3.83e+05       NA 3.83e+05
+## 852                  Maurizio Benazzo 3.81e+05 3.81e+05       NA 3.81e+05
+## 877                Michael Landon Jr. 3.80e+05 3.80e+05       NA 3.80e+05
+## 265                    David Anspaugh 3.75e+05 3.75e+05       NA 3.75e+05
+## 273                    David Duchovny 3.71e+05 3.71e+05       NA 3.71e+05
+## 12                  Agnieszka Holland 3.53e+05 3.53e+05       NA 3.53e+05
+## 721                      Keith Gordon 3.36e+05 3.36e+05       NA 3.36e+05
+## 842                       Matt Dillon 3.25e+05 3.25e+05       NA 3.25e+05
+## 232                       Craig Zobel 3.19e+05 3.19e+05       NA 3.19e+05
+## 1322                    Udayan Prasad 3.17e+05 3.17e+05       NA 3.17e+05
+## 36                          Alex Zamm 3.07e+05 3.07e+05       NA 3.07e+05
+## 370                    Eric Schaeffer 2.95e+05 2.95e+05       NA 2.95e+05
+## 354                     Efram Potelle 2.79e+05 2.79e+05       NA 2.79e+05
+## 738                      Kevin Jordan 2.77e+05 2.77e+05       NA 2.77e+05
+## 31                        Alex Gibney 2.75e+05 2.75e+05       NA 2.75e+05
+## 663                          Jon Gunn 2.57e+05 1.29e+05 6.14e+04 1.29e+05
+## 909                        Mike Bruce 2.44e+05 2.44e+05       NA 2.44e+05
+## 938                    Neema Barnette 2.43e+05 2.43e+05       NA 2.43e+05
+## 241                        Dan Harris 2.29e+05 2.29e+05       NA 2.29e+05
+## 1105                      Robert Cary 2.20e+05 2.20e+05       NA 2.20e+05
+## 110                     Bill Plympton 2.03e+05 2.03e+05       NA 2.03e+05
+## 1270                    Tim Heidecker 2.01e+05 2.01e+05       NA 2.01e+05
+## 763                    Laurie Collyer 1.98e+05 1.98e+05       NA 1.98e+05
+## 556                       Jeff Garlin 1.95e+05 1.95e+05       NA 1.95e+05
+## 168                     Carmen Marron 1.79e+05 1.79e+05       NA 1.79e+05
+## 1265                          Ti West 1.78e+05 8.91e+04 1.64e+04 8.91e+04
+## 21                       Alan Rudolph 1.75e+05 1.75e+05       NA 1.75e+05
+## 702                    Joshua Tickell 1.74e+05 1.74e+05       NA 1.74e+05
+## 152                    Bruce Campbell 1.73e+05 1.73e+05       NA 1.73e+05
+## 175                   Charles Chaplin 1.63e+05 1.63e+05       NA 1.63e+05
+## 900                Michel Orion Scott 1.56e+05 1.56e+05       NA 1.56e+05
+## 788                       Lucky McKee 1.46e+05 1.46e+05       NA 1.46e+05
+## 318                       Deon Taylor 1.43e+05 1.43e+05       NA 1.43e+05
+## 1240                    Stuart Gordon 1.32e+05 1.32e+05       NA 1.32e+05
+## 478                      Henry Hobson 1.31e+05 1.31e+05       NA 1.31e+05
+## 56                      Andrew Wilson 1.27e+05 1.27e+05       NA 1.27e+05
+## 18                        Alan Metter 1.26e+05 1.26e+05       NA 1.26e+05
+## 945                  Nicholas Fackler 1.25e+05 1.25e+05       NA 1.25e+05
+## 758                      Lance Mungia 1.24e+05 1.24e+05       NA 1.24e+05
+## 246                    Daniel Algrant 1.22e+05 1.22e+05       NA 1.22e+05
+## 1011                       Pete Jones 1.20e+05 1.20e+05       NA 1.20e+05
+## 1267                       Tim Boxell 1.19e+05 1.19e+05       NA 1.19e+05
+## 608                 Joey Lauren Adams 1.18e+05 1.18e+05       NA 1.18e+05
+## 1301                       Tom Putnam 1.11e+05 1.11e+05       NA 1.11e+05
+## 759                     Larry Blamire 1.11e+05 1.11e+05       NA 1.11e+05
+## 13         Agnieszka Wojtowicz-Vosloo 1.08e+05 1.08e+05       NA 1.08e+05
+## 446                       Goran Dukic 1.04e+05 1.04e+05       NA 1.04e+05
+## 7                           Adam Rapp 1.01e+05 1.01e+05       NA 1.01e+05
+## 489                        Hue Rhodes 1.01e+05 1.01e+05       NA 1.01e+05
+## 708                    Julio DePietro 1.01e+05 1.01e+05       NA 1.01e+05
+## 1060                       Reed Cowan 9.99e+04 9.99e+04       NA 9.99e+04
+## 659                       Johnny Remo 9.67e+04 9.67e+04       NA 9.67e+04
+## 717               Katherine Dieckmann 9.29e+04 9.29e+04       NA 9.29e+04
+## 1230                 Steven R. Monroe 9.24e+04 9.24e+04       NA 9.24e+04
+## 86                       Ava DuVernay 7.80e+04 7.80e+04       NA 7.80e+04
+## 262                        Daryl Wein 7.64e+04 7.64e+04       NA 7.64e+04
+## 34                        Alex Rivera 7.57e+04 7.57e+04       NA 7.57e+04
+## 869                Michael D. Sellers 7.19e+04 7.19e+04       NA 7.19e+04
+## 866                    Michael Clancy 7.05e+04 7.05e+04       NA 7.05e+04
+## 975                     Oren Moverman 6.66e+04 6.66e+04       NA 6.66e+04
+## 1197                Stefan Ruzowitzky 6.58e+04 6.58e+04       NA 6.58e+04
+## 101                Benjamin Dickinson 6.25e+04 6.25e+04       NA 6.25e+04
+## 346                         E.L. Katz 5.94e+04 5.94e+04       NA 5.94e+04
+## 754                         Kurt Voss 5.89e+04 5.89e+04       NA 5.89e+04
+## 298                   David Schwimmer 5.82e+04 5.82e+04       NA 5.82e+04
+## 1113                   Robert Moresco 5.35e+04 5.35e+04       NA 5.35e+04
+## 524                     James Mottern 5.22e+04 5.22e+04       NA 5.22e+04
+## 79                         Arie Posin 4.95e+04 4.95e+04       NA 4.95e+04
+## 954                       Nick Tomnay 4.84e+04 4.84e+04       NA 4.84e+04
+## 1209         Stephen Milburn Anderson 4.65e+04 4.65e+04       NA 4.65e+04
+## 132                     Brandon Trost 4.06e+04 4.06e+04       NA 4.06e+04
+## 535                   Jason Alexander 3.99e+04 3.99e+04       NA 3.99e+04
+## 1156                     S.R. Bindler 3.65e+04 3.65e+04       NA 3.65e+04
+## 601                      Joe Swanberg 3.01e+04 3.01e+04       NA 3.01e+04
+## 324                      Dito Montiel 2.89e+04 2.89e+04       NA 2.89e+04
+## 434                    George Ratliff 2.74e+04 2.74e+04       NA 2.74e+04
+## 364                        Eric Bress 2.39e+04 2.39e+04       NA 2.39e+04
+## 782                     Lloyd Kaufman 2.30e+04 2.30e+04       NA 2.30e+04
+## 14                     Akiva Goldsman 2.25e+04 2.25e+04       NA 2.25e+04
+## 508                      Jake Paltrow 2.04e+04 2.04e+04       NA 2.04e+04
+## 716                         Kat Coiro 2.02e+04 2.02e+04       NA 2.02e+04
+## 681                Jonathan Kesselman 1.95e+04 1.95e+04       NA 1.95e+04
+## 884                  Michael Meredith 1.93e+04 1.93e+04       NA 1.93e+04
+## 583                        Jim Mickle 1.85e+04 1.85e+04       NA 1.85e+04
+## 483                   Hilary Brougher 1.82e+04 1.82e+04       NA 1.82e+04
+## 964                      Noah Buschel 1.76e+04 1.76e+04       NA 1.76e+04
+## 620                       John Duigan 1.56e+04 1.56e+04       NA 1.56e+04
+## 81                      Arthur Hiller 1.54e+04 1.54e+04       NA 1.54e+04
+## 1065                  Rich Christiano 1.53e+04 1.53e+04       NA 1.53e+04
+## 1161                    Sam Peckinpah 1.49e+04 1.49e+04       NA 1.49e+04
+## 1278                    Timothy Hines 1.46e+04 1.46e+04       NA 1.46e+04
+## 1175                      Scott Ziehl 1.35e+04 1.35e+04       NA 1.35e+04
+## 35                         Alex Smith 1.31e+04 1.31e+04       NA 1.31e+04
+## 47                       Anand Tucker 1.26e+04 1.26e+04       NA 1.26e+04
+## 1241                     Sue Corcoran 1.18e+04 1.18e+04       NA 1.18e+04
+## 236                     Damian Nieman 1.07e+04 1.07e+04       NA 1.07e+04
+## 369                     Eric Nicholas 1.00e+04 1.00e+04       NA 1.00e+04
+## 977                      Orson Welles 7.93e+03 7.93e+03       NA 7.93e+03
+## 1051                     Ramaa Mosley 6.64e+03 6.64e+03       NA 6.64e+03
+## 463                      Hal Haberman 6.39e+03 6.39e+03       NA 6.39e+03
+## 1171                   Scott Marshall 5.56e+03 5.56e+03       NA 5.56e+03
+## 349                  Eddie O&#39;Flaherty 5.20e+03 5.20e+03       NA 5.20e+03
+## 1108                  Robert Fontaine 3.33e+03 3.33e+03       NA 3.33e+03
+## 4                       Adam Goldberg 2.58e+03 2.58e+03       NA 2.58e+03
+## 153                      Bruce Dellis 2.47e+03 2.47e+03       NA 2.47e+03
+## 992                      Paul Bunnell 2.44e+03 2.44e+03       NA 2.44e+03
+## 30                    Alex Craig Mann 1.33e+03 1.33e+03       NA 1.33e+03
+## 1086                      Ricki Stern 1.11e+03 1.11e+03       NA 1.11e+03
+## 396                      Frank Whaley 7.03e+02 7.03e+02       NA 7.03e+02</code></pre>
+<pre class="r"><code>head(Director_combined,15)</code></pre>
+<pre><code>##                Group.1        x     Mean       SD   Median
+## 1234  Steven Spielberg 4.01e+09 1.75e+08 1.01e+08 1.64e+08
+## 862        Michael Bay 2.23e+09 1.72e+08 1.27e+08 1.38e+08
+## 1268        Tim Burton 2.07e+09 1.29e+08 1.09e+08 7.65e+07
+## 1162         Sam Raimi 2.01e+09 2.01e+08 1.62e+08 2.35e+08
+## 514      James Cameron 1.91e+09 3.18e+08 3.09e+08 1.76e+08
+## 209  Christopher Nolan 1.81e+09 2.27e+08 1.87e+08 1.97e+08
+## 430       George Lucas 1.74e+09 3.48e+08 1.46e+08 3.80e+08
+## 1122   Robert Zemeckis 1.62e+09 1.25e+08 9.13e+07 1.01e+08
+## 217     Clint Eastwood 1.38e+09 7.25e+07 7.55e+07 4.67e+07
+## 388   Francis Lawrence 1.36e+09 2.72e+08 1.35e+08 2.82e+08
+## 1138        Ron Howard 1.34e+09 1.11e+08 8.19e+07 1.02e+08
+## 447     Gore Verbinski 1.33e+09 1.90e+08 1.54e+08 1.23e+08
+## 48      Andrew Adamson 1.14e+09 2.84e+08 1.21e+08 2.80e+08
+## 1186        Shawn Levy 1.13e+09 1.03e+08 6.55e+07 8.55e+07
+## 1088      Ridley Scott 1.13e+09 8.06e+07 6.88e+07 4.78e+07</code></pre>
+<pre class="r"><code>Genre_ratings &lt;- movies %&gt;%
+  select(genre,rating)
+Genre_avgrating &lt;- aggregate(Genre_ratings$rating, list(Genre_ratings$genre), mean)
+Genre_Stdevrating &lt;- aggregate(Genre_ratings$rating, list(Genre_ratings$genre), sd)
+Genre_avgrating$Standarddev &lt;- Genre_Stdevrating[, 2]
+Genre_Minrating &lt;- aggregate(Genre_ratings$rating, list(Genre_ratings$genre), min)
+Genre_avgrating$Min &lt;- Genre_Minrating[, 2]
+Genre_Maxrating &lt;- aggregate(Genre_ratings$rating, list(Genre_ratings$genre), max)
+Genre_avgrating$Max &lt;- Genre_Maxrating[, 2]
+Genre_Medianrating &lt;- aggregate(Genre_ratings$rating, list(Genre_ratings$genre), median)
+Genre_avgrating$Median &lt;- Genre_Medianrating[, 2]
+print(Genre_ratings)</code></pre>
+<pre><code>## # A tibble: 2,961 x 2
+##    genre     rating
+##    &lt;chr&gt;      &lt;dbl&gt;
+##  1 Action       7.9
+##  2 Drama        7.7
+##  3 Action       7  
+##  4 Action       8.1
+##  5 Action       9  
+##  6 Action       6.5
+##  7 Action       8.7
+##  8 Action       7.5
+##  9 Action       8.5
+## 10 Adventure    7.2
+## # ... with 2,951 more rows</code></pre>
+<div id="facebook-likes-vs.-gross-return" class="section level2">
+<h2>Facebook Likes vs. Gross Return</h2>
+<p>It seems facebook likes related to the cast are not the primary determinant of how well a movie is going to gross at the box office.</p>
+<pre class="r"><code>ggplot(movies, aes(x=cast_facebook_likes, y=gross)) + geom_point() + facet_wrap(~genre) + labs( x = &quot; Cast Facebook Likes&quot;, y = &quot; Gross Return&quot;)</code></pre>
+<p><img src="/blogs/blog6_files/figure-html/gross_on_fblikes-1.png" width="648" style="display: block; margin: auto;" /></p>
+</div>
+<div id="budget-vs-gross-return" class="section level2">
+<h2>Budget vs Gross Return</h2>
+<p>At first glance when we compare budget to gross at the box office we see that there is a positive relationship, where movies with higher budgets tend to do better than those with low ones. However when we facet according to genre we observe that this relationship is far more pronounced in the action and adventure genres than in others. This is best explained by the fact that making an entertaining action movie costs more than making a good biography - a.k.a Michael Bay derives more marginal revenue for every marginal dollar spent on more explosives, than someone making a biography might.</p>
+<pre class="r"><code>ggplot(movies, aes(x=budget, y=gross, color = genre)) + geom_point() </code></pre>
+<p><img src="/blogs/blog6_files/figure-html/gross_on_budget-1.png" width="648" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot(movies, aes(x=budget, y=gross)) + geom_point() + facet_wrap(~genre)</code></pre>
+<p><img src="/blogs/blog6_files/figure-html/gross_on_budget-2.png" width="648" style="display: block; margin: auto;" /></p>
+</div>
+<div id="ratings-vs.-gross-return" class="section level2">
+<h2>Ratings vs. Gross Return</h2>
+<p>We can see a positive, but not very clear relationship when it comes to ratings vs gross return at the box office. There are movies with high ratings making less than similar movies with lower ratings. This would lead us to conclude that ratings are also not the primary determinant of gross return on a movie.</p>
+<pre class="r"><code>ggplot(movies, aes(x=rating, y=gross)) + geom_point() + facet_wrap(~genre) + labs( x = &quot;IMDB Ratings&quot;, y = &quot; Gross Returns&quot;)</code></pre>
+<p><img src="/blogs/blog6_files/figure-html/gross_on_rating-1.png" width="648" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># In order to reproduce the graph shown above we begin by calculating the confidence intervals for the mean ratings of Burton and Spielberg
+
+#We calculate the 95% CI for Spielberg as follows:
+conf_interval_SS &lt;- movies %&gt;% 
+  drop_na() %&gt;% 
+ select(director, rating) %&gt;% 
+  filter(director==&quot;Steven Spielberg&quot;) %&gt;% 
+  summarise(mean_rating = mean(rating),
+            sd_rating = sd(rating),
+            count = n(),
+            # get t-critical value with (n-1) degrees of freedom
+            t_critical = qt(0.975, count-1),
+            se_rating = sd(rating)/sqrt(count),
+            margin_of_error = t_critical * se_rating,
+            rating_low = mean_rating - margin_of_error,
+            rating_high = mean_rating + margin_of_error)
+
+
+#We calculate the 95% CI for Burton as follows:
+conf_interval_TB &lt;- movies %&gt;% 
+  drop_na() %&gt;% 
+ select(director, rating) %&gt;% 
+  filter(director==&quot;Tim Burton&quot;) %&gt;% 
+  summarise(mean_rating = mean(rating),
+            sd_rating = sd(rating),
+            count = n(),
+            # get t-critical value with (n-1) degrees of freedom
+            t_critical = qt(0.975, count-1),
+            se_rating = sd(rating)/sqrt(count),
+            margin_of_error = t_critical * se_rating,
+            rating_low = mean_rating - margin_of_error,
+            rating_high = mean_rating + margin_of_error)  
+
+
+#We now merge the two data frames so that we can model them on a single graph
+merged_conf &lt;- bind_rows(conf_interval_SS,conf_interval_TB) 
+M1 &lt;- add_column(merged_conf, .before = 1,  Name = c(&quot;Tim Burton&quot;, &quot;Steven Spielberg&quot;))
+
+
+#We first create a plot with the relevant data mapping
+p1 &lt;- ggplot(M1, aes(x=mean_rating, y=Name, color=Name)) + 
+      #We now add some clarifying features: Titles, axis names and so on
+      labs(title=&quot;Do Spielberg and Burton have the same IMDB ratings?&quot;, 
+           subtitle = &quot;95% Confidence Intervals overlap&quot;, x=&quot;Mean IMDB rating&quot;, y=&quot;&quot;) + 
+           theme(legend.position = &quot;none&quot;)
+
+
+#Having created the base of the graph we apply the geom_errorbar and geom_rect features to add further functionality
+p1 + geom_point(size=4) + geom_errorbar(aes(xmax=rating_high, xmin=rating_low), width=0.1, size=2) + 
+     geom_rect(xmin=7.27, xmax=7.335, ymin=-4, ymax=7.5, color=&quot;grey&quot;, fill=&quot;grey&quot;, alpha=0.3) +
+    #We now add data labels specifying the position of each on the graph 
+     geom_text(aes(label=round(mean_rating, digits= 2)),size=5,hjust=0.5, vjust=-1.5) +
+     geom_text(aes(label=round(rating_high, digits = 2)),hjust=-3.9, vjust=-1.5) +
+     geom_text(aes(label=round(rating_low, digits = 2)),hjust=4.7, vjust=-1.5) </code></pre>
+<p><img src="/blogs/blog6_files/figure-html/unnamed-chunk-4-1.png" width="648" style="display: block; margin: auto;" /></p>
+</div>
+</div>
