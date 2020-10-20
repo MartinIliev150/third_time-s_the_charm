@@ -3,10 +3,10 @@ categories:
 - ""
 - ""
 date: "2017-10-31T22:42:51-05:00"
-description: Nullam et orci eu lorem consequat tincidunt vivamus et sagittis magna sed nunc rhoncus condimentum sem. In efficitur ligula tate urna. Maecenas massa sed magna lacinia magna pellentesque lorem ipsum dolor. Nullam et orci eu lorem consequat tincidunt. Vivamus et sagittis tempus.
+description: Some quick background and information about me. 
 draft: false
-image: pic07.jpg
+image: me123.jpg
 keywords: ""
-slug: aliquam
-title: Aliquam
+slug: blog4
+title: Quick Bio & About
 ---
