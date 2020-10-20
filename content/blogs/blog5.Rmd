@@ -194,14 +194,4 @@ ggplot(myStocks_returns_annual, aes(x=year(date), y=yearly_returns, fill=symbol)
   NULL
 ```
 
-```{r}
-install.packages("kableExtra")
-
-myStocks_returns_monthly %>% 
-  tq_performance(Ra = monthly_returns, #the name of the variable containing the returns of the asset
-                 Rb = NULL, 
-                 performance_fun = SharpeRatio) %>% 
- kableExtra::kable() %>%
-  kable_styling(c("striped", "bordered"))
-```
 
