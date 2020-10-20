@@ -154,12 +154,26 @@ summarise_monthly_returns</code></pre>
 ##  9 AAPL   2017-09-29      -0.0602   
 ## 10 AAPL   2017-10-31       0.0968   
 ## # ... with 386 more rows</code></pre>
-<pre class="r"><code>ggplot(summ_monthly_returns_plot, aes(x = monthly_returns, color = symbol))+ geom_density() +labs( x = &quot; Returns&quot;, y = &quot; Density&quot;)+facet_wrap(~symbol)</code></pre>
+<pre class="r"><code>ggplot(summ_monthly_returns_plot, aes(x = monthly_returns, color = symbol, fill=symbol))+ geom_density() +labs( x = &quot; Returns&quot;, y = &quot; Density&quot;)+facet_grid(rows = &quot;symbol&quot;, scales = &quot;free_y&quot;)</code></pre>
 <p><img src="/blogs/blog5_files/figure-html/density_monthly_returns-1.png" width="648" style="display: block; margin: auto;" /></p>
 <div id="distribution-of-returns-and-risk" class="section level2">
 <h2>Distribution of Returns and Risk</h2>
 <p>The spread of returns (a.k.a the standard deviation) is the most widely used form of risk measure when it comes to stock market performance. The narrower the spread the less risk is involved. From the above graph we can see that the SPY is the safest among the chosen instruments, but that is hardly surprising given the fact that an index aggregates the performance of a wide basket of securities.</p>
 <p>One of the most risky assets on the graph above is Tesla Inc., as indicated by the spread of its returns. Keeping this in mind its also worthwhile to note that riskier stocks also carry the potential for a higher reward, as indicated by the considerable density of the Tesla distribution at and above 3%, compared to the almost zero density of the SPY at the same mark.</p>
+<pre class="r"><code>myStocks_returns_annual %&gt;% 
+  group_by(symbol) %&gt;% 
+  mutate(median_return= median(yearly_returns)) %&gt;% 
+  ggplot(aes(x=reorder(symbol, median_return), y=yearly_returns, colour=symbol)) +
+  geom_boxplot()+
+  coord_flip()+
+  labs(x=&quot;Stock&quot;, 
+       y=&quot;Returns&quot;, 
+       title = &quot;Boxplot of Annual Returns&quot;)+
+  scale_y_continuous(labels = scales::percent_format(accuracy = 2))+
+  guides(color=FALSE) +
+  theme_bw()+
+  NULL</code></pre>
+<p><img src="/blogs/blog5_files/figure-html/unnamed-chunk-1-1.png" width="648" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>ggplot(data= summarise_monthly_returns, mapping = aes(x = sd, y = mean, color = symbol, label= symbol)) +
 geom_point() + geom_text_repel() + theme(legend.position=&quot;none&quot;) + labs( x = &quot; Risk &quot;, y = &quot; Return&quot;)</code></pre>
 <p><img src="/blogs/blog5_files/figure-html/risk_return_plot-1.png" width="648" style="display: block; margin: auto;" /></p>
@@ -168,5 +182,30 @@ geom_point() + geom_text_repel() + theme(legend.position=&quot;none&quot;) + lab
 <h2>Risk vs Return Trade Off</h2>
 <p>The risk return relationship is best exemplified by the graph above, which is a scater plot of the expected return vs standard deviation of said returns for specific securities. Ideally an investor would like to get a high return for a considerably low amount of risk, and position himself in the top left quadrant of the graph.</p>
 <p>On the other hand, every investor would avoid the lower right quadrant, which equals low expected returns and high risk. There are also those securities which although bearing a similar amount of risk, have different expected returns. For example - Goldman Sachs Inc. and Apple have roughly the same risk profile, and yet Apple’s expected return is much higher than that of GS.</p>
+<pre class="r"><code>ggplot(myStocks_returns_annual, aes(x=year(date), y=yearly_returns, fill=symbol)) +
+  geom_col(position = &quot;dodge&quot;)+
+  labs(x=&quot;Year&quot;, y=&quot;Returns&quot;, title = &quot;Annual Returns&quot;)+
+  scale_y_continuous(labels = scales::percent)+
+  guides(fill=guide_legend(title=NULL))+
+  theme_bw()+
+  NULL</code></pre>
+<p><img src="/blogs/blog5_files/figure-html/unnamed-chunk-2-1.png" width="648" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>myStocks_returns_monthly %&gt;% 
+  tq_performance(Ra = monthly_returns, #the name of the variable containing the returns of the asset
+                 Rb = NULL, 
+                 performance_fun = SharpeRatio) </code></pre>
+<pre><code>## # A tibble: 9 x 4
+## # Groups:   symbol [9]
+##   symbol `ESSharpe(Rf=0%,p=95%~ `StdDevSharpe(Rf=0%,p=95~ `VaRSharpe(Rf=0%,p=95~
+##   &lt;chr&gt;                   &lt;dbl&gt;                     &lt;dbl&gt;                  &lt;dbl&gt;
+## 1 AAPL                  0.179                      0.318                 0.231  
+## 2 JPM                   0.0708                     0.173                 0.106  
+## 3 HAL                   0.00520                    0.0161                0.00995
+## 4 GS                    0.0364                     0.0748                0.0485 
+## 5 KKR                   0.0911                     0.184                 0.125  
+## 6 TSLA                  0.211                      0.301                 0.349  
+## 7 ING                   0.0224                     0.0622                0.0362 
+## 8 CS                   -0.0179                    -0.0422               -0.0231 
+## 9 SPY                   0.128                      0.293                 0.204</code></pre>
 </div>
 </div>

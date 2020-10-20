@@ -327,7 +327,7 @@ get</code></pre>
 <pre><code>## function (x, pos = -1L, envir = as.environment(pos), mode = &quot;any&quot;, 
 ##     inherits = TRUE) 
 ## .Internal(get(x, envir, mode, inherits))
-## &lt;bytecode: 0x0000000007c77170&gt;
+## &lt;bytecode: 0x0000000007c77248&gt;
 ## &lt;environment: namespace:base&gt;</code></pre>
 <pre class="r"><code>print(return_on_budget)</code></pre>
 <pre><code>##        Group.1    gross   budget   return
@@ -1781,13 +1781,13 @@ print(Genre_ratings)</code></pre>
 <p>At first glance when we compare budget to gross at the box office we see that there is a positive relationship, where movies with higher budgets tend to do better than those with low ones. However when we facet according to genre we observe that this relationship is far more pronounced in the action and adventure genres than in others. This is best explained by the fact that making an entertaining action movie costs more than making a good biography - a.k.a Michael Bay derives more marginal revenue for every marginal dollar spent on more explosives, than someone making a biography might.</p>
 <pre class="r"><code>ggplot(movies, aes(x=budget, y=gross, color = genre)) + geom_point() </code></pre>
 <p><img src="/blogs/blog6_files/figure-html/gross_on_budget-1.png" width="648" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>ggplot(movies, aes(x=budget, y=gross)) + geom_point() + facet_wrap(~genre)</code></pre>
+<pre class="r"><code>ggplot(movies, aes(x=budget, y=gross, color = genre)) + geom_point() + facet_wrap(~genre)</code></pre>
 <p><img src="/blogs/blog6_files/figure-html/gross_on_budget-2.png" width="648" style="display: block; margin: auto;" /></p>
 </div>
 <div id="ratings-vs.-gross-return" class="section level2">
 <h2>Ratings vs. Gross Return</h2>
 <p>We can see a positive, but not very clear relationship when it comes to ratings vs gross return at the box office. There are movies with high ratings making less than similar movies with lower ratings. This would lead us to conclude that ratings are also not the primary determinant of gross return on a movie.</p>
-<pre class="r"><code>ggplot(movies, aes(x=rating, y=gross)) + geom_point() + facet_wrap(~genre) + labs( x = &quot;IMDB Ratings&quot;, y = &quot; Gross Returns&quot;)</code></pre>
+<pre class="r"><code>ggplot(movies, aes(x=rating, y=gross, color = genre)) + geom_point() + facet_wrap(~genre) + labs( x = &quot;IMDB Ratings&quot;, y = &quot; Gross Returns&quot;)</code></pre>
 <p><img src="/blogs/blog6_files/figure-html/gross_on_rating-1.png" width="648" style="display: block; margin: auto;" /></p>
 <pre class="r"><code># In order to reproduce the graph shown above we begin by calculating the confidence intervals for the mean ratings of Burton and Spielberg
 

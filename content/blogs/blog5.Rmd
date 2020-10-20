@@ -138,7 +138,7 @@ summ_monthly_returns_plot <- myStocks_returns_monthly %>%
   group_by(symbol) 
  summ_monthly_returns_plot  
  
-ggplot(summ_monthly_returns_plot, aes(x = monthly_returns, color = symbol))+ geom_density() +labs( x = " Returns", y = " Density")+facet_wrap(~symbol)
+ggplot(summ_monthly_returns_plot, aes(x = monthly_returns, color = symbol, fill=symbol))+ geom_density() +labs( x = " Returns", y = " Density")+facet_grid(rows = "symbol", scales = "free_y")
 
 ```
 
@@ -147,6 +147,26 @@ ggplot(summ_monthly_returns_plot, aes(x = monthly_returns, color = symbol))+ geo
 The spread of returns (a.k.a the standard deviation) is the most widely used form of risk measure when it comes to stock market performance. The narrower the spread the less risk is involved. From the above graph we can see that the SPY is the safest among the chosen instruments, but that is hardly surprising given the fact that an index aggregates the performance of a wide basket of securities. 
 
 One of the most risky assets on the graph above is Tesla Inc., as indicated by the spread of its returns. Keeping this in mind its also worthwhile to note that riskier stocks also carry the potential for a higher reward, as indicated by the considerable density of the Tesla distribution at and above 3%, compared to the almost zero density of the SPY at the same mark.
+
+```{r}
+ 
+myStocks_returns_annual %>% 
+  group_by(symbol) %>% 
+  mutate(median_return= median(yearly_returns)) %>% 
+  ggplot(aes(x=reorder(symbol, median_return), y=yearly_returns, colour=symbol)) +
+  geom_boxplot()+
+  coord_flip()+
+  labs(x="Stock", 
+       y="Returns", 
+       title = "Boxplot of Annual Returns")+
+  scale_y_continuous(labels = scales::percent_format(accuracy = 2))+
+  guides(color=FALSE) +
+  theme_bw()+
+  NULL
+  
+  
+
+```
 
 
 ```{r risk_return_plot}
@@ -163,4 +183,25 @@ geom_point() + geom_text_repel() + theme(legend.position="none") + labs( x = " R
 The risk return relationship is best exemplified by the graph above, which is a scater plot of the expected return vs standard deviation of said returns for specific securities. Ideally an investor would like to get a high return for a considerably low amount of risk, and position himself in the top left quadrant of the graph. 
 
 On the other hand, every investor would avoid the lower right quadrant, which equals low expected returns and high risk. There are also those securities which although bearing a similar amount of risk, have different expected returns. For example - Goldman Sachs Inc. and Apple have roughly the same risk profile, and yet Apple's expected return is much higher than that of GS.
+
+```{r}
+ggplot(myStocks_returns_annual, aes(x=year(date), y=yearly_returns, fill=symbol)) +
+  geom_col(position = "dodge")+
+  labs(x="Year", y="Returns", title = "Annual Returns")+
+  scale_y_continuous(labels = scales::percent)+
+  guides(fill=guide_legend(title=NULL))+
+  theme_bw()+
+  NULL
+```
+
+```{r}
+install.packages("kableExtra")
+
+myStocks_returns_monthly %>% 
+  tq_performance(Ra = monthly_returns, #the name of the variable containing the returns of the asset
+                 Rb = NULL, 
+                 performance_fun = SharpeRatio) %>% 
+ kableExtra::kable() %>%
+  kable_styling(c("striped", "bordered"))
+```
 

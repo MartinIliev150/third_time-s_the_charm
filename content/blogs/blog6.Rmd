@@ -136,7 +136,7 @@ ggplot(movies, aes(x=cast_facebook_likes, y=gross)) + geom_point() + facet_wrap(
 ```{r, gross_on_budget}
 
 ggplot(movies, aes(x=budget, y=gross, color = genre)) + geom_point() 
-ggplot(movies, aes(x=budget, y=gross)) + geom_point() + facet_wrap(~genre)
+ggplot(movies, aes(x=budget, y=gross, color = genre)) + geom_point() + facet_wrap(~genre)
 
 
 ```
@@ -147,7 +147,7 @@ ggplot(movies, aes(x=budget, y=gross)) + geom_point() + facet_wrap(~genre)
 
 ```{r, gross_on_rating}
 
-ggplot(movies, aes(x=rating, y=gross)) + geom_point() + facet_wrap(~genre) + labs( x = "IMDB Ratings", y = " Gross Returns")
+ggplot(movies, aes(x=rating, y=gross, color = genre)) + geom_point() + facet_wrap(~genre) + labs( x = "IMDB Ratings", y = " Gross Returns")
 
 ```
 
