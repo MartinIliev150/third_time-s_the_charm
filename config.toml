@@ -1,7 +1,7 @@
 # Site settings
 baseURL = "http://example.org/"
 languageCode = "en-us"
-title = "Forty"
+title = "Martin's Portfolio"
 theme = "forty"
 
 # Enter your tracking code to enable Google Analytics
@@ -19,7 +19,7 @@ disqusShortname = ""
   # CSS class.
 
   # Provide your metadata here.
-  name = "Your name"
+  name = "Martin"
   description = "Your description"
 
   # Link custom assets relative to /static
@@ -81,8 +81,8 @@ disqusShortname = ""
   [params.banner]
     # To change the background image on the homepage banner, replace 'banner.jpg' in
     # the 'static/img' folder.
-    title = "Hi, my name is Forty"
-    subtitle = "A RESPONSIVE SITE TEMPLATE DESIGNED BY HTML5 UP\nAND RELEASED UNDER THE CREATIVE COMMONS."
+    title = "Hi, my name is Martin"
+    subtitle = "A brief overvew of my work with R."
     buttonText = "Get Started"
 
 
