@@ -9,11 +9,21 @@
     <lastBuildDate>Tue, 31 Oct 2017 22:42:51 -0500</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Quick Bio &amp; About</title>
+      <link>/blogs/bio1/</link>
+      <pubDate>Tue, 31 Oct 2017 22:42:51 -0500</pubDate>
+      
+      <guid>/blogs/bio1/</guid>
+      <description>About MeMy name is Martin and this year I am a student at London Business School, where I am studying Financial Analysis.I am originally from Bulgaria where I completed my bachelors degree in Economics at the American University in Bulgaria. This year I turned 23 and moved to London to pursue my further education
+InterestsI am really passionate about investing and financial markets, and contrary to popular belief really enjoy my profession and haven’t chosen it because of the money.</description>
+    </item>
+    
+    <item>
+      <title>Quick Bio &amp; About</title>
       <link>/blogs/blog4/</link>
       <pubDate>Tue, 31 Oct 2017 22:42:51 -0500</pubDate>
       
       <guid>/blogs/blog4/</guid>
-      <description></description>
+      <description>#My name is Martin and this year I am a masters Student at London Business School.</description>
     </item>
     
     <item>
