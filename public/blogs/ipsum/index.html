@@ -8,7 +8,7 @@
 	<meta name="description" content="Your description">
 	<meta name="author" content="Martin">
 	<meta name="generator" content="Hugo 0.75.1" />
-	<title>Ipsum &middot; Martin&#39;s Portfolio</title>
+	<title>Analyzing returns of financial stocks vs S&amp;P500 &middot; Martin&#39;s Portfolio</title>
 	<!-- Stylesheets -->
 	
 	<link rel="stylesheet" href="/css/main.css"/>
@@ -77,12 +77,119 @@
                     <section id="one">
                         <div class="inner">
                             <header class="major">
-                                <h1>Ipsum</h1>
+                                <h1>Analyzing returns of financial stocks vs S&amp;P500</h1>
                             </header>
                             
                                 <span class="image main"><img src="/img/blogs/pic10.jpg" alt="" /></span>
                             
-                            <p>Nullam et orci eu lorem consequat tincidunt vivamus et sagittis magna sed nunc rhoncus condimentum sem. In efficitur ligula tate urna. Maecenas massa sed magna lacinia magna pellentesque lorem ipsum dolor. Nullam et orci eu lorem consequat tincidunt. Vivamus et sagittis tempus.</p>
+                            <pre><code class="language-{r," data-lang="{r,">knitr::opts_chunk$set(
+  message = FALSE, 
+  warning = FALSE, 
+  tidy=FALSE,     # display code as typed
+  size=&quot;small&quot;)   # slightly smaller font for code
+options(digits = 3)
+
+# default figure size
+knitr::opts_chunk$set(
+  fig.width=6.75, 
+  fig.height=6.75,
+  fig.align = &quot;center&quot;
+)
+</code></pre><pre><code class="language-{r" data-lang="{r">library(tidyverse)  # Load ggplot2, dplyr, and all the other tidyverse packages
+library(mosaic)
+library(ggthemes)
+library(lubridate)
+library(fivethirtyeight)
+library(here)
+library(skimr)
+library(janitor)
+library(vroom)
+library(tidyquant)
+library(ggrepel)
+</code></pre><h1 id="returns-of-financial-stocks">Returns of financial stocks</h1>
+<blockquote>
+<p>You may find useful the material on <a href="https://mam2021.netlify.app/reference/finance_data/">finance data sources</a>.</p>
+</blockquote>
+<pre><code class="language-{r" data-lang="{r">nyse &lt;- read_csv(here::here(&quot;data&quot;,&quot;nyse.csv&quot;))
+nyse
+</code></pre><pre><code class="language-{r" data-lang="{r">
+companies_per_sector &lt;- nyse %&gt;%
+	group_by(sector) %&gt;%
+	summarise(No_companies = n(), .groups = 'drop') %&gt;%
+	arrange(desc(No_companies))
+companies_per_sector
+
+companies_per_sector %&gt;%
+  slice_max(No_companies, n=12)%&gt;%
+  ggplot(aes(x = No_companies  , y = reorder(sector, No_companies)))+ geom_col(fill=&quot;blue&quot;) + 
+  labs( x = &quot; Number of Companies&quot;, y = &quot; &quot;)
+
+
+
+</code></pre><p>Next, let&rsquo;s choose some stocks and their ticker symbols and download some data. You <strong>MUST</strong> choose 6 different stocks from the ones listed below; You should, however, add <code>SPY</code> which is the SP500 ETF (Exchange Traded Fund).</p>
+<pre><code class="language-{r" data-lang="{r">
+myStocks &lt;- c(&quot;AAPL&quot;,&quot;JPM&quot;,&quot;HAL&quot;,&quot;GS&quot;,&quot;KKR&quot;,&quot;TSLA&quot;,&quot;ING&quot;,&quot;CS&quot;, &quot;SPY&quot; ) %&gt;%
+  tq_get(get  = &quot;stock.prices&quot;,
+         from = &quot;2011-01-01&quot;,
+         to   = &quot;2020-08-31&quot;) %&gt;%
+  group_by(symbol) 
+
+glimpse(myStocks) 
+</code></pre><pre><code class="language-{r" data-lang="{r">#calculate daily returns
+myStocks_returns_daily &lt;- myStocks %&gt;%
+  tq_transmute(select     = adjusted, 
+               mutate_fun = periodReturn, 
+               period     = &quot;daily&quot;, 
+               type       = &quot;log&quot;,
+               col_rename = &quot;daily_returns&quot;,
+               cols = c(nested.col))  
+
+#calculate monthly  returns
+myStocks_returns_monthly &lt;- myStocks %&gt;%
+  tq_transmute(select     = adjusted, 
+               mutate_fun = periodReturn, 
+               period     = &quot;monthly&quot;, 
+               type       = &quot;arithmetic&quot;,
+               col_rename = &quot;monthly_returns&quot;,
+               cols = c(nested.col)) 
+
+#calculate yearly returns
+myStocks_returns_annual &lt;- myStocks %&gt;%
+  group_by(symbol) %&gt;%
+  tq_transmute(select     = adjusted, 
+               mutate_fun = periodReturn, 
+               period     = &quot;yearly&quot;, 
+               type       = &quot;arithmetic&quot;,
+               col_rename = &quot;yearly_returns&quot;,
+               cols = c(nested.col))
+</code></pre><pre><code class="language-{r" data-lang="{r">
+summarise_monthly_returns &lt;- myStocks_returns_monthly %&gt;%
+  filter(date &gt;= &quot;2017-01-01&quot;)  %&gt;%
+  group_by(symbol) %&gt;%
+  summarize(min = min(monthly_returns), max =max(monthly_returns), median =median(monthly_returns), mean= mean(monthly_returns), sd=sd(monthly_returns), .groups = 'drop')
+summarise_monthly_returns
+
+
+</code></pre><pre><code class="language-{r" data-lang="{r">
+summ_monthly_returns_plot &lt;- myStocks_returns_monthly %&gt;%
+  filter(date &gt;= &quot;2017-01-01&quot;)  %&gt;%
+  group_by(symbol) 
+ summ_monthly_returns_plot  
+ 
+ggplot(summ_monthly_returns_plot, aes(x = monthly_returns, color = symbol))+ geom_density() +labs( x = &quot; Returns&quot;, y = &quot; Density&quot;)+facet_wrap(~symbol)
+
+</code></pre><h2 id="distribution-of-returns-and-risk">Distribution of Returns and Risk</h2>
+<p>The spread of returns (a.k.a the standard deviation) is the most widely used form of risk measure when it comes to stock market performance. The narrower the spread the less risk is involved. From the above graph we can see that the SPY is the safest among the chosen instruments, but that is hardly surprising given the fact that an index aggregates the performance of a wide basket of securities.</p>
+<p>One of the most risky assets on the graph above is Tesla Inc., as indicated by the spread of its returns. Keeping this in mind its also worthwhile to note that riskier stocks also carry the potential for a higher reward, as indicated by the considerable density of the Tesla distribution at and above 3%, compared to the almost zero density of the SPY at the same mark.</p>
+<pre><code class="language-{r" data-lang="{r">
+ggplot(data= summarise_monthly_returns, mapping = aes(x = sd, y = mean, color = symbol, label= symbol)) +
+geom_point() + geom_text_repel() + theme(legend.position=&quot;none&quot;) + labs( x = &quot; Risk &quot;, y = &quot; Return&quot;)
+
+
+
+</code></pre><h2 id="risk-vs-return-trade-off">Risk vs Return Trade Off</h2>
+<p>The risk return relationship is best exemplified by the graph above, which is a scater plot of the expected return vs standard deviation of said returns for specific securities. Ideally an investor would like to get a high return for a considerably low amount of risk, and position himself in the top left quadrant of the graph.</p>
+<p>On the other hand, every investor would avoid the lower right quadrant, which equals low expected returns and high risk. There are also those securities which although bearing a similar amount of risk, have different expected returns. For example - Goldman Sachs Inc. and Apple have roughly the same risk profile, and yet Apple&rsquo;s expected return is much higher than that of GS.</p>
 
                         </div>
                     </section>
