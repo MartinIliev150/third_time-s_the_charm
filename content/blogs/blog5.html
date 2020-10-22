@@ -69,7 +69,7 @@ companies_per_sector</code></pre>
 ## 12 Consumer Durables                8</code></pre>
 <pre class="r"><code>companies_per_sector %&gt;%
   slice_max(No_companies, n=12)%&gt;%
-  ggplot(aes(x = No_companies  , y = reorder(sector, No_companies)))+ geom_col(fill=&quot;blue&quot;) + 
+  ggplot(aes(x = No_companies  , y = reorder(sector, No_companies)))+ geom_col(fill=&quot;magenta&quot;) + 
   labs( x = &quot; Number of Companies&quot;, y = &quot; &quot;)</code></pre>
 <p><img src="/blogs/blog5_files/figure-html/companies_per_sector-1.png" width="648" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>Financials &lt;- nyse %&gt;% 

@@ -69,7 +69,7 @@ companies_per_sector
 
 companies_per_sector %>%
   slice_max(No_companies, n=12)%>%
-  ggplot(aes(x = No_companies  , y = reorder(sector, No_companies)))+ geom_col(fill="blue") + 
+  ggplot(aes(x = No_companies  , y = reorder(sector, No_companies)))+ geom_col(fill="magenta") + 
   labs( x = " Number of Companies", y = " ")
 
 Financials <- nyse %>% 
