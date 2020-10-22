@@ -66,8 +66,8 @@ Aleksander Foundation scholarship recipient
       <pubDate>Tue, 31 Oct 2017 21:28:43 -0500</pubDate>
       
       <guid>/blogs/blog5/</guid>
-      <description>knitr::opts_chunk$set(message = FALSE, warning = FALSE, tidy=FALSE, # display code as typedsize=&amp;quot;small&amp;quot;) # slightly smaller font for codeoptions(digits = 3)# default figure sizeknitr::opts_chunk$set(fig.width=6.75, fig.height=6.75,fig.align = &amp;quot;center&amp;quot;)Returns of financial stocksYou may find useful the material on finance data sources.
-nyse &amp;lt;- read_csv(here::here(&amp;quot;data&amp;quot;,&amp;quot;nyse.csv&amp;quot;))nyse## # A tibble: 508 x 6## symbol name ipo_year sector industry summary_quote ## &amp;lt;chr&amp;gt; &amp;lt;chr&amp;gt; &amp;lt;chr&amp;gt; &amp;lt;chr&amp;gt; &amp;lt;chr&amp;gt; &amp;lt;chr&amp;gt; ## 1 MMM 3M Company n/a Health C~ Medical/Dental In~ https://www.</description>
+      <description>knitr::opts_chunk$set(message = FALSE, warning = FALSE, tidy=FALSE, # display code as typedsize=&amp;quot;small&amp;quot;) # slightly smaller font for codeoptions(digits = 3)# default figure sizeknitr::opts_chunk$set(fig.width=6.75, fig.height=6.75,fig.align = &amp;quot;center&amp;quot;)Returns of financial sector stocksIn this analysis we would like to compare the return on several stocks in the financial services sector versus the performance of the broader S&amp;amp;P500 index.
+We start our analysis by collecting data on all the listed stocks on the NYSE.</description>
     </item>
     
     <item>

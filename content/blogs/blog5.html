@@ -26,11 +26,10 @@ knitr::opts_chunk$set(
   fig.height=6.75,
   fig.align = &quot;center&quot;
 )</code></pre>
-<div id="returns-of-financial-stocks" class="section level1">
-<h1>Returns of financial stocks</h1>
-<blockquote>
-<p>You may find useful the material on <a href="https://mam2021.netlify.app/reference/finance_data/">finance data sources</a>.</p>
-</blockquote>
+<div id="returns-of-financial-sector-stocks" class="section level1">
+<h1>Returns of financial sector stocks</h1>
+<p>In this analysis we would like to compare the return on several stocks in the financial services sector versus the performance of the broader S&amp;P500 index.</p>
+<p>We start our analysis by collecting data on all the listed stocks on the NYSE.</p>
 <pre class="r"><code>nyse &lt;- read_csv(here::here(&quot;data&quot;,&quot;nyse.csv&quot;))
 nyse</code></pre>
 <pre><code>## # A tibble: 508 x 6
@@ -47,6 +46,7 @@ nyse</code></pre>
 ##  9 AEM    Agnico Eagle~ n/a      Basic In~ Precious Metals    https://www.nasda~
 ## 10 APD    Air Products~ n/a      Basic In~ Major Chemicals    https://www.nasda~
 ## # ... with 498 more rows</code></pre>
+<p>We would now like to decompose all companies into the different sectors in which they operate.</p>
 <pre class="r"><code>companies_per_sector &lt;- nyse %&gt;%
     group_by(sector) %&gt;%
     summarise(No_companies = n(), .groups = &#39;drop&#39;) %&gt;%
@@ -72,8 +72,25 @@ companies_per_sector</code></pre>
   ggplot(aes(x = No_companies  , y = reorder(sector, No_companies)))+ geom_col(fill=&quot;blue&quot;) + 
   labs( x = &quot; Number of Companies&quot;, y = &quot; &quot;)</code></pre>
 <p><img src="/blogs/blog5_files/figure-html/companies_per_sector-1.png" width="648" style="display: block; margin: auto;" /></p>
-<p>Next, let’s choose some stocks and their ticker symbols and download some data. You <strong>MUST</strong> choose 6 different stocks from the ones listed below; You should, however, add <code>SPY</code> which is the SP500 ETF (Exchange Traded Fund).</p>
-<pre class="r"><code>myStocks &lt;- c(&quot;AAPL&quot;,&quot;JPM&quot;,&quot;HAL&quot;,&quot;GS&quot;,&quot;KKR&quot;,&quot;TSLA&quot;,&quot;ING&quot;,&quot;CS&quot;, &quot;SPY&quot; ) %&gt;%
+<pre class="r"><code>Financials &lt;- nyse %&gt;% 
+  filter(sector==&quot;Finance&quot;)
+Financials</code></pre>
+<pre><code>## # A tibble: 97 x 6
+##    symbol name              ipo_year sector  industry       summary_quote       
+##    &lt;chr&gt;  &lt;chr&gt;             &lt;chr&gt;    &lt;chr&gt;   &lt;chr&gt;          &lt;chr&gt;               
+##  1 AFL    Aflac Incorporat~ n/a      Finance Accident &amp;Hea~ https://www.nasdaq.~
+##  2 Y      Alleghany Corpor~ n/a      Finance Property-Casu~ https://www.nasdaq.~
+##  3 ALL    Allstate Corpora~ n/a      Finance Property-Casu~ https://www.nasdaq.~
+##  4 ALLY   Ally Financial I~ 2014     Finance Major Banks    https://www.nasdaq.~
+##  5 AXP    American Express~ n/a      Finance Finance: Cons~ https://www.nasdaq.~
+##  6 AIG    American Interna~ n/a      Finance Property-Casu~ https://www.nasdaq.~
+##  7 AMP    AMERIPRISE FINAN~ n/a      Finance Investment Ma~ https://www.nasdaq.~
+##  8 AON    Aon plc           n/a      Finance Specialty Ins~ https://www.nasdaq.~
+##  9 APO    Apollo Global Ma~ 2011     Finance Investment Ma~ https://www.nasdaq.~
+## 10 AJG    Arthur J. Gallag~ n/a      Finance Specialty Ins~ https://www.nasdaq.~
+## # ... with 87 more rows</code></pre>
+<p>We can now select a portfolio of stocks from the financial sector which we will compare performance wise versus the S&amp;P500 index. We select the ticker symbols of our stocks and input them into our list.</p>
+<pre class="r"><code>myStocks &lt;- c(&quot;MS&quot;,&quot;JPM&quot;,&quot;DB&quot;,&quot;GS&quot;,&quot;KKR&quot;,&quot;BLK&quot;,&quot;ING&quot;,&quot;CS&quot;, &quot;SPY&quot; ) %&gt;%
   tq_get(get  = &quot;stock.prices&quot;,
          from = &quot;2011-01-01&quot;,
          to   = &quot;2020-08-31&quot;) %&gt;%
@@ -83,14 +100,15 @@ glimpse(myStocks) </code></pre>
 <pre><code>## Rows: 21,879
 ## Columns: 8
 ## Groups: symbol [9]
-## $ symbol   &lt;chr&gt; &quot;AAPL&quot;, &quot;AAPL&quot;, &quot;AAPL&quot;, &quot;AAPL&quot;, &quot;AAPL&quot;, &quot;AAPL&quot;, &quot;AAPL&quot;, &quot;A...
+## $ symbol   &lt;chr&gt; &quot;MS&quot;, &quot;MS&quot;, &quot;MS&quot;, &quot;MS&quot;, &quot;MS&quot;, &quot;MS&quot;, &quot;MS&quot;, &quot;MS&quot;, &quot;MS&quot;, &quot;MS&quot;...
 ## $ date     &lt;date&gt; 2011-01-03, 2011-01-04, 2011-01-05, 2011-01-06, 2011-01-0...
-## $ open     &lt;dbl&gt; 11.6, 11.9, 11.8, 12.0, 11.9, 12.1, 12.3, 12.3, 12.3, 12.4...
-## $ high     &lt;dbl&gt; 11.8, 11.9, 11.9, 12.0, 12.0, 12.3, 12.3, 12.3, 12.4, 12.4...
-## $ low      &lt;dbl&gt; 11.6, 11.7, 11.8, 11.9, 11.9, 12.0, 12.1, 12.2, 12.3, 12.3...
-## $ close    &lt;dbl&gt; 11.8, 11.8, 11.9, 11.9, 12.0, 12.2, 12.2, 12.3, 12.3, 12.4...
-## $ volume   &lt;dbl&gt; 4.45e+08, 3.09e+08, 2.56e+08, 3.00e+08, 3.12e+08, 4.49e+08...
-## $ adjusted &lt;dbl&gt; 10.2, 10.2, 10.3, 10.3, 10.4, 10.6, 10.5, 10.6, 10.7, 10.8...</code></pre>
+## $ open     &lt;dbl&gt; 27.6, 28.5, 28.4, 28.9, 28.8, 28.1, 28.3, 28.2, 28.7, 28.2...
+## $ high     &lt;dbl&gt; 28.6, 28.5, 28.8, 29.0, 28.9, 28.1, 28.5, 28.7, 28.8, 29.2...
+## $ low      &lt;dbl&gt; 27.5, 28.0, 28.3, 28.6, 28.0, 27.6, 27.8, 28.1, 28.2, 28.2...
+## $ close    &lt;dbl&gt; 28.2, 28.5, 28.8, 28.8, 28.2, 28.0, 28.0, 28.7, 28.3, 29.0...
+## $ volume   &lt;dbl&gt; 21176700, 12859900, 15101100, 13200900, 17512600, 15184900...
+## $ adjusted &lt;dbl&gt; 23.7, 23.9, 24.2, 24.2, 23.7, 23.6, 23.5, 24.1, 23.8, 24.3...</code></pre>
+<p>We now proceed by calculating some key metrics on the performance of our group of stocks, namely the daily, monthly and yearly returns.</p>
 <pre class="r"><code>#calculate daily returns
 myStocks_returns_daily &lt;- myStocks %&gt;%
   tq_transmute(select     = adjusted, 
@@ -121,8 +139,9 @@ myStocks_returns_annual &lt;- myStocks %&gt;%
 <pre class="r"><code>summarise_monthly_returns &lt;- myStocks_returns_monthly %&gt;%
   filter(date &gt;= &quot;2017-01-01&quot;)  %&gt;%
   group_by(symbol) %&gt;%
-  summarize(min = min(monthly_returns), max =max(monthly_returns), median =median(monthly_returns), mean= mean(monthly_returns), sd=sd(monthly_returns), .groups = &#39;drop&#39;)
-summarise_monthly_returns</code></pre>
+  summarize(min = min(monthly_returns), max =max(monthly_returns), median =median(monthly_returns), mean=   
+  mean(monthly_returns), sd=sd(monthly_returns), .groups = &#39;drop&#39;)
+  summarise_monthly_returns</code></pre>
 <pre><code>## # A tibble: 9 x 6
 ##   symbol    min   max   median     mean     sd
 ##   &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt;
@@ -135,31 +154,23 @@ summarise_monthly_returns</code></pre>
 ## 7 KKR    -0.179 0.145  0.0400   0.0242  0.0802
 ## 8 SPY    -0.125 0.127  0.0183   0.0129  0.0457
 ## 9 TSLA   -0.224 0.555  0.0448   0.0699  0.189</code></pre>
+<p>We can now visualise the performance of our group of stocks starting at the beginning of 2017</p>
 <pre class="r"><code>summ_monthly_returns_plot &lt;- myStocks_returns_monthly %&gt;%
   filter(date &gt;= &quot;2017-01-01&quot;)  %&gt;%
   group_by(symbol) 
- summ_monthly_returns_plot  </code></pre>
-<pre><code>## # A tibble: 396 x 3
-## # Groups:   symbol [9]
-##    symbol date       monthly_returns
-##    &lt;chr&gt;  &lt;date&gt;               &lt;dbl&gt;
-##  1 AAPL   2017-01-31       0.0477   
-##  2 AAPL   2017-02-28       0.134    
-##  3 AAPL   2017-03-31       0.0487   
-##  4 AAPL   2017-04-28      -0.0000697
-##  5 AAPL   2017-05-31       0.0678   
-##  6 AAPL   2017-06-30      -0.0572   
-##  7 AAPL   2017-07-31       0.0327   
-##  8 AAPL   2017-08-31       0.107    
-##  9 AAPL   2017-09-29      -0.0602   
-## 10 AAPL   2017-10-31       0.0968   
-## # ... with 386 more rows</code></pre>
-<pre class="r"><code>ggplot(summ_monthly_returns_plot, aes(x = monthly_returns, color = symbol, fill=symbol))+ geom_density() +labs( x = &quot; Returns&quot;, y = &quot; Density&quot;)+facet_grid(rows = &quot;symbol&quot;, scales = &quot;free_y&quot;)</code></pre>
+  
+ 
+ggplot(summ_monthly_returns_plot, aes(y = monthly_returns, x=date, color = symbol, fill=symbol))+     
+       geom_line()+facet_wrap(~symbol)</code></pre>
 <p><img src="/blogs/blog5_files/figure-html/density_monthly_returns-1.png" width="648" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot(summ_monthly_returns_plot, aes(x = monthly_returns, color = symbol, fill=symbol))+ 
+       geom_density() +
+       labs( x = &quot; Returns&quot;, y = &quot; Density&quot;)+facet_grid(rows = &quot;symbol&quot;, scales = &quot;free_y&quot;)</code></pre>
+<p><img src="/blogs/blog5_files/figure-html/density_monthly_returns-2.png" width="648" style="display: block; margin: auto;" /></p>
 <div id="distribution-of-returns-and-risk" class="section level2">
 <h2>Distribution of Returns and Risk</h2>
 <p>The spread of returns (a.k.a the standard deviation) is the most widely used form of risk measure when it comes to stock market performance. The narrower the spread the less risk is involved. From the above graph we can see that the SPY is the safest among the chosen instruments, but that is hardly surprising given the fact that an index aggregates the performance of a wide basket of securities.</p>
-<p>One of the most risky assets on the graph above is Tesla Inc., as indicated by the spread of its returns. Keeping this in mind its also worthwhile to note that riskier stocks also carry the potential for a higher reward, as indicated by the considerable density of the Tesla distribution at and above 3%, compared to the almost zero density of the SPY at the same mark.</p>
+<p>One of the most risky assets on the graph above is Deutche Bank., as indicated by the spread of its returns. Keeping this in mind its also worthwhile to note that riskier stocks also carry the potential for a higher reward, as indicated by the considerable density of the Tesla distribution at and above 1.5%, compared to the almost zero density of the SPY at the same mark.</p>
 <pre class="r"><code>myStocks_returns_annual %&gt;% 
   group_by(symbol) %&gt;% 
   mutate(median_return= median(yearly_returns)) %&gt;% 
@@ -175,7 +186,7 @@ summarise_monthly_returns</code></pre>
   NULL</code></pre>
 <p><img src="/blogs/blog5_files/figure-html/unnamed-chunk-1-1.png" width="648" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>ggplot(data= summarise_monthly_returns, mapping = aes(x = sd, y = mean, color = symbol, label= symbol)) +
-geom_point() + geom_text_repel() + theme(legend.position=&quot;none&quot;) + labs( x = &quot; Risk &quot;, y = &quot; Return&quot;)</code></pre>
+geom_point() + geom_text_repel() + theme(legend.position=&quot;none&quot;) + labs( x = &quot; Risk &quot;, y = &quot; Return&quot;) </code></pre>
 <p><img src="/blogs/blog5_files/figure-html/risk_return_plot-1.png" width="648" style="display: block; margin: auto;" /></p>
 </div>
 <div id="risk-vs-return-trade-off" class="section level2">
@@ -189,6 +200,7 @@ geom_point() + geom_text_repel() + theme(legend.position=&quot;none&quot;) + lab
   guides(fill=guide_legend(title=NULL))+
   theme_bw()+
   NULL</code></pre>
-<p><img src="/blogs/blog5_files/figure-html/unnamed-chunk-2-1.png" width="648" style="display: block; margin: auto;" /></p>
+<p><img src="/blogs/blog5_files/figure-html/unnamed-chunk-2-1.png" width="648" style="display: block; margin: auto;" />
+We xan now take a look at the broader yearly return on our group of stocks and see how that compares versus the yearly return on the S&amp;P500. As we can observe when times are good financials give superior returns compared to the S&amp;P, when times are bad on the other hand financials loose more value than the broader index. This would lead us to believe that these stocks have a beta of more than 1, making them riskier than the index.</p>
 </div>
 </div>
