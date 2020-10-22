@@ -30,7 +30,7 @@ knitr::opts_chunk$set(
 
 
 ```{r load-libraries, warning=FALSE, message=FALSE, echo=FALSE}
-library(tidyverse)  # Load ggplot2, dplyr, and all the other tidyverse packages
+library(tidyverse)  
 library(mosaic)
 library(ggthemes)
 library(lubridate)
@@ -46,16 +46,18 @@ library(ggrepel)
 
 
 
-# Returns of financial stocks
+# Returns of financial sector stocks
 
+In this analysis we would like to compare the return on several stocks in the financial services sector versus the performance of the broader S&P500 index.
 
-> You may find useful the material on [finance data sources](https://mam2021.netlify.app/reference/finance_data/). 
+We start our analysis by collecting data on all the listed stocks on the NYSE. 
 
 ```{r load_nyse_data, message=FALSE, warning=FALSE}
 nyse <- read_csv(here::here("data","nyse.csv"))
 nyse
 ```
 
+We would now like to decompose all companies into the different sectors in which they operate. 
 
 ```{r companies_per_sector}
 
@@ -70,16 +72,18 @@ companies_per_sector %>%
   ggplot(aes(x = No_companies  , y = reorder(sector, No_companies)))+ geom_col(fill="blue") + 
   labs( x = " Number of Companies", y = " ")
 
+Financials <- nyse %>% 
+  filter(sector=="Finance")
+Financials
 
 
 ```
 
-Next, let's choose some stocks and their ticker symbols and download some data. You **MUST** choose 6 different stocks from the ones listed below; You should, however, add `SPY` which is the SP500 ETF (Exchange Traded Fund).
-
+We can now select a portfolio of stocks from the financial sector which we will compare performance wise versus the S&P500 index. We select the ticker symbols of our stocks and input them into our list. 
 
 ```{r get_price_data, message=FALSE, warning=FALSE, cache=TRUE}
 
-myStocks <- c("AAPL","JPM","HAL","GS","KKR","TSLA","ING","CS", "SPY" ) %>%
+myStocks <- c("MS","JPM","DB","GS","KKR","BLK","ING","CS", "SPY" ) %>%
   tq_get(get  = "stock.prices",
          from = "2011-01-01",
          to   = "2020-08-31") %>%
@@ -88,6 +92,7 @@ myStocks <- c("AAPL","JPM","HAL","GS","KKR","TSLA","ING","CS", "SPY" ) %>%
 glimpse(myStocks) 
 ```
 
+We now proceed by calculating some key metrics on the performance of our group of stocks, namely the daily, monthly and yearly returns. 
 
 ```{r calculate_returns, message=FALSE, warning=FALSE, cache=TRUE}
 #calculate daily returns
@@ -125,20 +130,30 @@ myStocks_returns_annual <- myStocks %>%
 summarise_monthly_returns <- myStocks_returns_monthly %>%
   filter(date >= "2017-01-01")  %>%
   group_by(symbol) %>%
-  summarize(min = min(monthly_returns), max =max(monthly_returns), median =median(monthly_returns), mean= mean(monthly_returns), sd=sd(monthly_returns), .groups = 'drop')
-summarise_monthly_returns
+  summarize(min = min(monthly_returns), max =max(monthly_returns), median =median(monthly_returns), mean=   
+  mean(monthly_returns), sd=sd(monthly_returns), .groups = 'drop')
+  summarise_monthly_returns
 
 
 ```
+
+We can now visualise the performance of our group of stocks starting at the beginning of 2017 
 
 ```{r density_monthly_returns}
 
 summ_monthly_returns_plot <- myStocks_returns_monthly %>%
   filter(date >= "2017-01-01")  %>%
   group_by(symbol) 
- summ_monthly_returns_plot  
+  
  
-ggplot(summ_monthly_returns_plot, aes(x = monthly_returns, color = symbol, fill=symbol))+ geom_density() +labs( x = " Returns", y = " Density")+facet_grid(rows = "symbol", scales = "free_y")
+ggplot(summ_monthly_returns_plot, aes(y = monthly_returns, x=date, color = symbol, fill=symbol))+     
+       geom_line()+facet_wrap(~symbol)
+ 
+ggplot(summ_monthly_returns_plot, aes(x = monthly_returns, color = symbol, fill=symbol))+ 
+       geom_density() +
+       labs( x = " Returns", y = " Density")+facet_grid(rows = "symbol", scales = "free_y")
+
+
 
 ```
 
@@ -146,7 +161,7 @@ ggplot(summ_monthly_returns_plot, aes(x = monthly_returns, color = symbol, fill=
 
 The spread of returns (a.k.a the standard deviation) is the most widely used form of risk measure when it comes to stock market performance. The narrower the spread the less risk is involved. From the above graph we can see that the SPY is the safest among the chosen instruments, but that is hardly surprising given the fact that an index aggregates the performance of a wide basket of securities. 
 
-One of the most risky assets on the graph above is Tesla Inc., as indicated by the spread of its returns. Keeping this in mind its also worthwhile to note that riskier stocks also carry the potential for a higher reward, as indicated by the considerable density of the Tesla distribution at and above 3%, compared to the almost zero density of the SPY at the same mark.
+One of the most risky assets on the graph above is Deutche Bank., as indicated by the spread of its returns. Keeping this in mind its also worthwhile to note that riskier stocks also carry the potential for a higher reward, as indicated by the considerable density of the Tesla distribution at and above 1.5%, compared to the almost zero density of the SPY at the same mark.
 
 ```{r}
  
@@ -172,7 +187,7 @@ myStocks_returns_annual %>%
 ```{r risk_return_plot}
 
 ggplot(data= summarise_monthly_returns, mapping = aes(x = sd, y = mean, color = symbol, label= symbol)) +
-geom_point() + geom_text_repel() + theme(legend.position="none") + labs( x = " Risk ", y = " Return")
+geom_point() + geom_text_repel() + theme(legend.position="none") + labs( x = " Risk ", y = " Return") 
 
 
 
@@ -193,5 +208,5 @@ ggplot(myStocks_returns_annual, aes(x=year(date), y=yearly_returns, fill=symbol)
   theme_bw()+
   NULL
 ```
-
+We xan now take a look at the broader yearly return on our group of stocks and see how that compares versus the yearly return on the S&P500. As we can observe when times are good financials give superior returns compared to the S&P, when times are bad on the other hand financials loose more value than the broader index. This would lead us to believe that these stocks have a beta of more than 1, making them riskier than the index. 
 
